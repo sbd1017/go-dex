@@ -6,6 +6,7 @@ jobs:
   python:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         python: ["3.11", "3.12", "3.13"]
     steps:
@@ -19,6 +20,7 @@ jobs:
   search-engine:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         node: ["20", "22"]
     steps:
@@ -26,4 +28,4 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
-      - run: node --test tests/js/
+      - run: node --test tests/js/*.test.mjs

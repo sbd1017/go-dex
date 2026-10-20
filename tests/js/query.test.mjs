@@ -1,4 +1,4 @@
-// node --test tests/js
+// node --test tests/js/*.test.mjs
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { buildModel } from '../../godex/static/js/model.js';

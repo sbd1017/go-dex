@@ -90,7 +90,7 @@ Changes are listed in [CHANGELOG.md](CHANGELOG.md).
 ```bash
 .venv/bin/pip install -r requirements-dev.txt
 .venv/bin/python -m pytest        # API, rules, auth modes, import/export
-node --test tests/js              # the search engine
+node --test tests/js/*.test.mjs   # the search engine
 ```
 
 The front end is plain ES modules with no build step and a strict Content Security Policy

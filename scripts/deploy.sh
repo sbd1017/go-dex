@@ -16,7 +16,7 @@ for a in "$@"; do case "$a" in --install) INSTALL=1;; --sprites) SPRITES=1;; *) 
 
 echo "== tests"
 .venv/bin/python -m pytest -q
-node --test tests/js >/dev/null && echo "js tests ok"
+node --test tests/js/*.test.mjs >/dev/null && echo "js tests ok"
 
 render() {  # template -> stdout
   sed -e "s|@APP_DIR@|$APP_DIR|g" -e "s|@APP_USER@|$APP_USER|g" -e "s|@PORT@|$PORT|g" -e "s|@BASE_PATH@|$BASE_PATH|g" \
