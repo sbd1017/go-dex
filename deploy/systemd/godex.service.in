@@ -1,0 +1,54 @@
+# godex web app. Rendered by scripts/deploy.sh from deploy.env (@NAME@ placeholders).
+[Unit]
+Description=godex: Pokémon GO collection Pokédex (@BASE_PATH@)
+After=network.target
+
+[Service]
+Type=simple
+User=@APP_USER@
+Group=@APP_USER@
+WorkingDirectory=@APP_DIR@
+Environment=PYTHONUNBUFFERED=1
+Environment=PYTHONDONTWRITEBYTECODE=1
+Environment=DEX_AUTH=@AUTH@
+Environment=DEX_HOST=127.0.0.1
+Environment=DEX_PORT=@PORT@
+Environment=DEX_BASE_PATH=@BASE_PATH@
+Environment=DEX_DATA_DIR=@APP_DIR@/var
+Environment=DEX_SPRITES_DIR=@APP_DIR@/media/sprites
+ExecStart=@APP_DIR@/.venv/bin/python -m godex.serve
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=20
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=@APP_DIR@/var
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectKernelLogs=true
+ProtectControlGroups=true
+ProtectClock=true
+ProtectHostname=true
+RestrictSUIDSGID=true
+RestrictNamespaces=true
+RestrictRealtime=true
+LockPersonality=true
+RemoveIPC=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+# Only the reverse proxy on this host talks to it, and it talks to nothing.
+IPAddressDeny=any
+IPAddressAllow=localhost
+CapabilityBoundingSet=
+AmbientCapabilities=
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+MemoryMax=192M
+# Serving images uses a thread pool (about 40 threads): 32 ran out under load.
+TasksMax=256
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,36 @@
+# Weekly Pokédex catalog update: downloads the public sources, rebuilds, checks and loads the catalog.
+# The only godex process with internet access; the web app itself has none.
+[Unit]
+Description=godex: update the Pokédex catalog (new Pokémon, forms, costumes, shinies, backgrounds)
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=@APP_USER@
+Group=@APP_USER@
+WorkingDirectory=@APP_DIR@
+Environment=PYTHONUNBUFFERED=1
+Environment=PYTHONDONTWRITEBYTECODE=1
+Environment=DEX_DATA_DIR=@APP_DIR@/var
+Environment=DEX_AUTH=@AUTH@
+ExecStart=@APP_DIR@/.venv/bin/python -m godex.cli catalog-update
+Nice=10
+TimeoutStartSec=15min
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=@APP_DIR@/var
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+RestrictNamespaces=true
+LockPersonality=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+CapabilityBoundingSet=
+SystemCallArchitectures=native
+MemoryMax=768M

@@ -1,0 +1,5 @@
+# godex rate limits (nginx http{} context). Rendered by scripts/deploy.sh.
+limit_req_zone  $binary_remote_addr zone=godex_read:10m   rate=10r/s;
+limit_req_zone  $binary_remote_addr zone=godex_static:10m rate=60r/s;
+limit_req_zone  $binary_remote_addr zone=godex_write:10m  rate=90r/m;
+limit_conn_zone $binary_remote_addr zone=godex_conn:10m;

@@ -1,0 +1,71 @@
+{
+  "_comment": "Local corrections applied by tools/build_catalog.py on top of the upstream sources. Edit freely, then rebuild the catalog and run `python -m godex.cli catalog-load`.",
+  "form_names": {
+    "PIKACHU_VS_2019": "Libre",
+    "MEWTWO_A": "Armored",
+    "SLOWPOKE_2020": "2020"
+  },
+  "form_name_tokens": {
+    "COPY_2019": "Clone",
+    "GOFEST": "GO Fest",
+    "GOTOUR": "GO Tour",
+    "WCS": "WCS",
+    "TSHIRT": "T-shirt",
+    "5TH_ANNIV": "5th Anniversary",
+    "PXP": "PXP",
+    "BB": "BB"
+  },
+  "_untargeted": "Forms that exist in the game data but cannot be caught or kept (battle-only or internal). They stay in the catalog but do not count towards completion.",
+  "untargeted_forms": [
+    "DARMANITAN_ZEN",
+    "DARMANITAN_GALARIAN_ZEN",
+    "MELOETTA_PIROUETTE",
+    "AEGISLASH_BLADE",
+    "MIMIKYU_BUSTED",
+    "NECROZMA_ULTRA",
+    "WISHIWASHI_SCHOOL",
+    "EISCUE_NOICE",
+    "MORPEKO_HANGRY",
+    "CRAMORANT_GULPING",
+    "CRAMORANT_GORGING"
+  ],
+  "untargeted_form_suffixes": [
+    "_S"
+  ],
+  "_species": "Per-species flag overrides keyed by National Dex number: released, shiny, shadow, gmax, dynamax.",
+  "species": {},
+  "_forms": "Per-form flag overrides keyed by form id: released, shiny, shadow, name, kind.",
+  "forms": {},
+  "background_tokens": {
+    "GOFEST": "GO Fest",
+    "GOTOUR": "GO Tour",
+    "CITYSAFARI": "City Safari",
+    "AIRADVENTURES": "Air Adventures",
+    "GOWA": "GO Wild Area",
+    "WORLD_CHAMPIONSHIPS": "World Championships",
+    "SAFARI_ZONE": "Safari Zone",
+    "NYC": "New York",
+    "LOSANGELES": "Los Angeles",
+    "LASVEGAS": "Las Vegas",
+    "MEXICOCITY": "Mexico City",
+    "HONGKONG": "Hong Kong",
+    "SAOPAULO": "São Paulo",
+    "MLB": "MLB"
+  },
+  "background_names": {
+    "LC_SPECIALBACKGROUND_TEAM_BLUE": "Team Mystic",
+    "LC_SPECIALBACKGROUND_TEAM_RED": "Team Valor",
+    "LC_SPECIALBACKGROUND_TEAM_YELLOW": "Team Instinct"
+  },
+  "_missing_species": "Species the sources don't fully describe yet (e.g. in the game files but not released). Added as unreleased unless 'released' is set.",
+  "missing_species": {
+    "902": {
+      "name": "Basculegion",
+      "types": [
+        "water",
+        "ghost"
+      ],
+      "gen": 8
+    }
+  }
+}

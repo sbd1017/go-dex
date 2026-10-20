@@ -1,0 +1,15 @@
+[project]
+name = "godex"
+version = "1.0.0"
+description = "A searchable Pokémon GO collection Pokédex you can host yourself"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.11"
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["F", "E", "W", "B", "UP", "SIM", "C4", "PIE", "RET"]
+ignore = ["E501", "UP007", "UP038", "SIM108", "SIM102", "SIM118", "RET504", "RET505", "B008"]

@@ -1,0 +1,10 @@
+[Unit]
+Description=godex: daily database backup
+
+[Timer]
+OnCalendar=*-*-* 04:17
+RandomizedDelaySec=20m
+Persistent=true
+
+[Install]
+WantedBy=timers.target

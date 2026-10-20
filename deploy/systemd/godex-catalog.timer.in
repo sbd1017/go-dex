@@ -1,0 +1,10 @@
+[Unit]
+Description=godex: weekly Pokédex catalog update
+
+[Timer]
+OnCalendar=Mon *-*-* 05:20
+RandomizedDelaySec=45min
+Persistent=true
+
+[Install]
+WantedBy=timers.target

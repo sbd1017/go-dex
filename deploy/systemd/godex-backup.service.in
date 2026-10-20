@@ -1,0 +1,18 @@
+[Unit]
+Description=godex: daily database backup (keeps 30)
+
+[Service]
+Type=oneshot
+User=@APP_USER@
+Group=@APP_USER@
+WorkingDirectory=@APP_DIR@
+Environment=DEX_DATA_DIR=@APP_DIR@/var
+Environment=DEX_AUTH=@AUTH@
+ExecStart=@APP_DIR@/.venv/bin/python -m godex.cli backup --keep 30
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=@APP_DIR@/var
+IPAddressDeny=any

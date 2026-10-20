@@ -1,0 +1,83 @@
+# godex behind @BASE_PATH@ (nginx server{} context). Rendered by scripts/deploy.sh.
+#
+# Reading is public: GET/HEAD only, and no identity headers ever reach the app on these paths.
+# Editing (@BASE_PATH@/admin, @BASE_PATH@/api/admin/) is left to the site's own login (auth_request at server level),
+# which must set X-Site-User / X-Site-CSRF / X-Site-Expires (see godex/site_auth.py). The app checks them again,
+# plus Origin and a CSRF token on every POST.
+#
+# Any add_header here replaces the server-level ones, so each location sets the two the app does not send itself.
+
+location = @BASE_PATH@ {
+    auth_request off;
+    return 308 @BASE_PATH@/$is_args$args;
+}
+
+location ^~ @BASE_PATH@/ {
+    auth_request off;
+    limit_except GET HEAD { deny all; }
+    access_log /var/log/nginx/godex.access.log @LOG_FORMAT@;
+    limit_conn godex_conn 30;
+    limit_conn_status 429;
+    limit_req zone=godex_read burst=60 nodelay;
+    limit_req_status 429;
+    proxy_pass http://127.0.0.1:@PORT@;
+    include snippets/godex-proxy.conf;
+    proxy_set_header X-Site-User "";
+    proxy_set_header X-Site-CSRF "";
+    proxy_set_header X-Site-Expires "";
+    add_header Strict-Transport-Security "max-age=31536000" always;
+    add_header X-Robots-Tag "noindex, nofollow" always;
+
+    location ^~ @BASE_PATH@/media/ {          # Pokémon images: many small files, cacheable
+        auth_request off;
+        limit_except GET HEAD { deny all; }
+        access_log off;
+        limit_conn godex_conn 200;                # a grid loads dozens of images at once
+        limit_req zone=godex_static burst=400 nodelay;
+        proxy_pass http://127.0.0.1:@PORT@;
+        include snippets/godex-proxy.conf;
+        proxy_set_header X-Site-User "";
+        proxy_set_header X-Site-CSRF "";
+        proxy_set_header X-Site-Expires "";
+        add_header Strict-Transport-Security "max-age=31536000" always;
+        add_header X-Robots-Tag "noindex" always;
+    }
+    location ^~ @BASE_PATH@/static/ {
+        auth_request off;
+        limit_except GET HEAD { deny all; }
+        access_log off;
+        limit_conn godex_conn 100;
+        limit_req zone=godex_static burst=200 nodelay;
+        proxy_pass http://127.0.0.1:@PORT@;
+        include snippets/godex-proxy.conf;
+        proxy_set_header X-Site-User "";
+        proxy_set_header X-Site-CSRF "";
+        proxy_set_header X-Site-Expires "";
+        add_header Strict-Transport-Security "max-age=31536000" always;
+    }
+}
+
+# Editing: the site login applies (auth_request inherited from the server block).
+location ^~ @BASE_PATH@/admin {
+    access_log /var/log/nginx/godex.access.log @LOG_FORMAT@;
+    limit_except GET HEAD { deny all; }
+    limit_req zone=godex_read burst=60 nodelay;
+    limit_req_status 429;
+    proxy_pass http://127.0.0.1:@PORT@;
+    include snippets/godex-proxy.conf;
+    include @IDENTITY_INCLUDE@;
+    add_header Strict-Transport-Security "max-age=31536000" always;
+    add_header X-Robots-Tag "noindex, nofollow, noarchive" always;
+}
+location ^~ @BASE_PATH@/api/admin/ {
+    access_log /var/log/nginx/godex.access.log @LOG_FORMAT@;
+    limit_req zone=godex_write burst=120 nodelay;
+    limit_req_status 429;
+    client_max_body_size 8m;                  # JSON imports
+    client_body_buffer_size 1m;
+    proxy_pass http://127.0.0.1:@PORT@;
+    include snippets/godex-proxy.conf;
+    include @IDENTITY_INCLUDE@;
+    add_header Strict-Transport-Security "max-age=31536000" always;
+    add_header X-Robots-Tag "noindex, nofollow, noarchive" always;
+}

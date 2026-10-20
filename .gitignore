@@ -1,0 +1,15 @@
+# runtime data: your collection lives here, never commit it
+var/
+*.sqlite3
+*.sqlite3-*
+deploy.env
+# Pokémon images are copyrighted: bring your own (see media/sprites/README.md)
+media/sprites/*
+!media/sprites/README.md
+.venv/
+__pycache__/
+.pytest_cache/
+*.pyc
+.DS_Store
+.cache/
+var-dev/
