@@ -57,14 +57,14 @@ def test_catalog_reload_keeps_collection(loaded, client):
 def test_quick_rules(client):
     vid = "BULBASAUR|n|normal|none"
     e = client.post("/dex/api/admin/quick", json={"variant_id": vid, "trade_delta": 2}).json()["entries"][0]
-    assert (e["owned"], e["for_trade"], e["registered"]) == (2, 2, 1)       # trading one means you own it
-    r = client.post("/dex/api/admin/quick", json={"variant_id": vid, "registered": 0})
-    assert r.status_code == 400                                            # owned implies registered
-    e = client.post("/dex/api/admin/quick", json={"variant_id": vid, "owned_delta": -1}).json()["entries"][0]
-    assert (e["owned"], e["for_trade"]) == (1, 1)
-    client.post("/dex/api/admin/quick", json={"variant_id": vid, "owned": 0})
+    assert (e["for_trade"], e["registered"]) == (2, 1)                    # offering one puts it in the Pokédex
+    e = client.post("/dex/api/admin/quick", json={"variant_id": vid, "trade_delta": -1}).json()["entries"][0]
+    assert e["for_trade"] == 1
+    # Taking it out of the Pokédex clears what was offered too, and an empty plain entry disappears.
     assert client.post("/dex/api/admin/quick", json={"variant_id": vid, "registered": 0}).json()["entries"] == []
-    assert client.post("/dex/api/admin/quick", json={"variant_id": "NOPE|n|normal|none", "owned": 1}).status_code == 400
+    e = client.post("/dex/api/admin/quick", json={"variant_id": vid, "registered": 1}).json()["entries"][0]
+    assert (e["registered"], e["for_trade"]) == (1, 0)
+    assert client.post("/dex/api/admin/quick", json={"variant_id": "NOPE|n|normal|none", "registered": 1}).status_code == 400
 
 
 def test_special_entry_validation(client):

@@ -46,15 +46,13 @@ async function save(app, dlg, path, body, message) {
 
 // ---------------------------------------------------------------- entries
 export function entryEditor(app, { entry = null, variant = null } = {}) {
-  const e = entry || { registered: true, owned: 1, trade: 0, gender: '', size: '', lucky: false, iv: null, bg: null, moves: '', cp: null,
+  const e = entry || { registered: true, trade: 0, gender: '', size: '', lucky: false, iv: null, bg: null, moves: '', cp: null,
     nickname: '', caughtOn: null, note: '', privateNote: '', tags: [] };
   const v = entry ? entry.v : variant;
   const iv = e.iv || [null, null, null];
   const f = h('form', { class: 'dlg-body form', novalidate: true },
     h('p', { class: 'lead' }, h('b', { text: variantLabel(v) }), h('span', { class: 'muted', text: ` · #${pad(v.sp.dex)}` })),
     h('div', { class: 'row3' },
-      check('registered', 'Registered', e.registered),
-      field('Owned', num('owned', e.owned, 0, 9999, 'Owned')),
       field('For trade', num('for_trade', e.trade, 0, 9999, 'For trade'))),
     h('div', { class: 'row3' },
       field('Size', h('select', { name: 'size' }, opt('', 'Normal size', e.size), opt('xxl', 'XXL', e.size), opt('xl', 'XL', e.size),
@@ -88,7 +86,8 @@ export function entryEditor(app, { entry = null, variant = null } = {}) {
     ev.preventDefault();
     const d = new FormData(f);
     const body = {
-      variant_id: v.id, registered: !!d.get('registered'), owned: intOrNull(d.get('owned')) ?? 0, for_trade: intOrNull(d.get('for_trade')) ?? 0,
+      variant_id: v.id, registered: true, for_trade: intOrNull(d.get('for_trade')) ?? 0,
+      owned: intOrNull(d.get('for_trade')) ?? 0,          // only kept so that what is offered is also had
       size: d.get('size'), gender: d.get('gender'), lucky: !!d.get('lucky'),
       iv_atk: intOrNull(d.get('iv_atk')), iv_def: intOrNull(d.get('iv_def')), iv_sta: intOrNull(d.get('iv_sta')),
       background_id: d.get('background_id') || null, moves: d.get('moves'), cp: intOrNull(d.get('cp')),

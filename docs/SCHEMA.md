@@ -1,7 +1,7 @@
 # Data model
 
 The aim is that nothing has to be rebuilt later when the collection gets more detailed. A single
-`pokemon_id + owned` flag cannot say "shiny costume Pikachu", "registered but transferred", or "three of these
+`pokemon_id + owned` flag cannot say "shiny costume Pikachu", "XXL with the Madrid background", or "three of these
 for trade", so the model separates what exists in the game from what you have.
 
 ## Two layers
@@ -26,7 +26,7 @@ decision and wins. "Missing" only ever means "counts and you don't have it".
 
 | Table | Holds |
 |---|---|
-| `entries` | Pokémon you have or had. `registered`, `owned` (count), `for_trade` (count, ≤ owned), plus per-Pokémon details: gender, size (XXS/XS/XL/XXL), lucky, IVs, background, moves, CP, nickname, date, public note, private note, source |
+| `entries` | Pokémon in your Pokédex. `registered`, `for_trade` (count), `owned` (kept at least as high as `for_trade`; the app no longer shows it), plus per-Pokémon details: gender, size (XXS/XS/XL/XXL), lucky, IVs, background, moves, CP, nickname, date, public note, private note, source |
 | `wishes` | what you want. Species, optional form, and requirements where NULL means "any": shiny, Shadow/Purified, Dynamax/Gigantamax, gender, size, lucky, minimum IVs, any/location/special background or a specific one, moves. Priority (high/normal/someday), status (open/fulfilled/archived), public flag, notes |
 | `tags`, `entry_tags`, `wish_tags` | free labels (pvp, living-dex, special-trade, event names ...) |
 | `settings` | page title, owner name, intro, default view, header link |
@@ -43,8 +43,10 @@ Things that differ between two Pokémon of the same variant, like size, lucky, I
 * XXL shiny: an entry on the shiny variant with `size = 'xxl'`.
 * A legendary with a location background: an entry with `background_id`.
 * Several backgrounds for one species: several entries.
-* Registered but not owned: `registered = 1, owned = 0`.
-* Owned but not for trade: `owned = 2, for_trade = 0`. Three spare: `for_trade = 3`.
+* In the Pokédex: `registered = 1`. Three spare to trade: `for_trade = 3`.
+
+The app treats "have it" as "it's in your Pokédex". The schema keeps an `owned` count (useful for imports from
+other tools, and so a future version could show storage again); the app keeps it in step with `for_trade`.
 * The same Pokémon wished for in different ways: several wish rows.
 
 Every variant has one "plain" entry (no details) that the quick toggles edit. Anything special gets its own

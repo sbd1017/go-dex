@@ -101,7 +101,7 @@ function wishVariants(w) {
 
 /** Does this owned entry meet the wish's per-Pokémon requirements? */
 export function entrySatisfies(w, e, m) {
-  if (!e.owned) return false;
+  if (!e.registered) return false;
   if (w.size && e.size !== w.size) return false;
   if (w.lucky !== null && e.lucky !== !!w.lucky) return false;
   if (w.gender && e.gender !== w.gender) return false;
@@ -117,7 +117,7 @@ export function entrySatisfies(w, e, m) {
 
 export const wishSatisfied = (w, m) => w.variants.some(v => v.entries.some(e => entrySatisfies(w, e, m)));
 
-/** Entry counts in the current mode. */
+/** Does this entry count as having it? The app always uses 'registered' (in your Pokédex). */
 export const inMode = (e, mode) => (mode === 'registered' ? e.registered : e.owned > 0);
 export const variantHas = (v, mode) => v.entries.some(e => inMode(e, mode));
 export const owned = v => v.entries.reduce((n, e) => n + e.owned, 0);

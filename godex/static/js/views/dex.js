@@ -2,7 +2,7 @@
 import { h, icon, pad, fmt, confirmBox, toast, modal, copyText } from '../dom.js';
 import { GO_WORDS, goSearchString, picksFromQuery } from '../gosearch.js';
 import { parse, compileVariants } from '../query.js';
-import { variantHas, formLabel, variantLabel, replaceEntries, owned as ownedCount } from '../model.js';
+import { variantHas, formLabel, variantLabel, replaceEntries } from '../model.js';
 import { computeStats, REGION_NAMES } from '../stats.js';
 import { sprite, pips, searchBar } from '../components.js';
 
@@ -14,8 +14,8 @@ const SUMMARY = [['dex', 'Pokédex'], ['shiny', 'Shiny'], ['shadow', 'Shadow'], 
 // Quick entry (admin): tap cards to toggle one variant without opening each Pokémon. Remembered for this tab.
 const QE_KEY = 'dex-quick-entry';
 const quick = (() => {
-  try { return { on: false, action: 'own', shiny: false, align: 'normal', ...JSON.parse(sessionStorage.getItem(QE_KEY) || '{}') }; }
-  catch { return { on: false, action: 'own', shiny: false, align: 'normal' }; }
+  try { return { on: false, shiny: false, align: 'normal', ...JSON.parse(sessionStorage.getItem(QE_KEY) || '{}') }; }
+  catch { return { on: false, shiny: false, align: 'normal' }; }
 })();
 const saveQuick = () => { try { sessionStorage.setItem(QE_KEY, JSON.stringify(quick)); } catch { /* private mode */ } };
 let qeChain = Promise.resolve();      // taps are saved one after another, in order
@@ -142,8 +142,7 @@ function card(app, g, mode, cache, variantQuery) {
   const scope = (g.form ? g.form.variants : g.sp.variants).filter(v => v.target || v.entries.length);
   const name = g.form ? formLabel(g.form) : g.sp.name;
   const href = app.href('dex', { dex: g.sp.dex, form: g.form?.id, text: app.route.text });
-  const ownedN = scope.reduce((n, v) => n + v.entries.reduce((k, e) => k + e.owned, 0), 0);
-  const sig = [g.key, rep.id, !!haveV, variantQuery, href, ownedN, scope.map(v => v.entries.length + ':' + v.wishes.length).join(','), mode,
+  const sig = [g.key, rep.id, !!haveV, variantQuery, href, scope.map(v => v.entries.length + ':' + v.wishes.length).join(','), mode,
     scope.reduce((n, v) => n + v.entries.reduce((k, e) => k + e.trade + (e.registered ? 1 : 0) + (e.size ? 2 : 0) + (e.lucky ? 4 : 0) + (e.bg ? 8 : 0), 0), 0)].join('|');
   const cached = cache.get(sig);
   if (cached) return cached;
@@ -151,7 +150,6 @@ function card(app, g, mode, cache, variantQuery) {
     style: { '--t1': `var(--ty-${rep.form.types[0]})`, '--t2': `var(--ty-${rep.form.types[1] || rep.form.types[0]})` },
     'aria-label': `${pad(g.sp.dex)} ${name}${haveV ? '' : ', missing'}` },
   h('span', { class: 'no', text: pad(g.sp.dex) }),
-  ownedN > 1 ? h('span', { class: 'qty', title: `${ownedN} owned`, text: `×${ownedN}` }) : null,
   sprite(app, rep, { silhouette: !haveV && !variantQuery }),
   h('span', { class: 'nm', text: g.form && g.form.name ? g.form.name : g.sp.name }),
   g.form && g.form.name ? h('span', { class: 'sub', text: g.sp.name }) : null,
@@ -245,11 +243,9 @@ function bulkMenu(app, matched) {
   return h('details', { class: 'menu' }, h('summary', { class: 'btn sm' }, icon('bolt'), 'Bulk'),
     h('div', { class: 'menu-list' },
       h('p', { class: 'muted', text: 'Applies to every variant this search shows.' }),
-      h('button', { type: 'button', onclick: () => act('register', 'Mark all as registered') }, 'Mark registered'),
-      h('button', { type: 'button', onclick: () => act('own', 'Mark all as owned (1 each)') }, 'Mark owned'),
-      h('button', { type: 'button', onclick: () => act('untrade', 'Take all off trade') }, 'Not for trade'),
-      h('button', { type: 'button', onclick: () => act('unown', 'Mark all as not owned') }, 'Not owned'),
-      h('button', { type: 'button', onclick: () => act('unregister', 'Mark all as not registered') }, 'Not registered')));
+      h('button', { type: 'button', onclick: () => act('register', 'Add all to the Pokédex') }, 'Add to Pokédex'),
+      h('button', { type: 'button', onclick: () => act('unregister', 'Take all out of the Pokédex') }, 'Remove from Pokédex'),
+      h('button', { type: 'button', onclick: () => act('untrade', 'Take all off trade') }, 'Not for trade')));
 }
 
 /** "Shiny Shadow +2": which of the matched variants the card stands for, in a variant search. */
@@ -272,8 +268,7 @@ function paintQuickBar(app, st) {
       h('input', { type: 'checkbox', checked: quick.on, onchange: e => set('on', e.target.checked) }),
       h('span', { class: 'sw' }), h('span', { text: 'Quick entry' })),
     ...(quick.on ? [
-      h('span', { class: 'qe-l', text: 'Tap marks' }),
-      seg('What a tap changes', 'action', [['own', 'Owned'], ['register', 'Registered']]),
+      h('span', { class: 'qe-l', text: 'Tap adds' }),
       seg('Shiny or not', 'shiny', [[false, 'Normal'], [true, 'Shiny']]),
       seg('Shadow or purified', 'align', [['normal', 'Plain'], ['shadow', 'Shadow'], ['purified', 'Purified']]),
     ] : []));
@@ -286,15 +281,14 @@ function quickTarget(g) {
 }
 
 function quickState(v) {
-  if (!v) return false;
-  return quick.action === 'own' ? ownedCount(v) > 0 : v.entries.some(e => e.registered);
+  return !!v && v.entries.some(e => e.registered);
 }
 
 function quickCard(app, g, st) {
   const v = quickTarget(g);
   const on = quickState(v);
   const name = g.form && g.form.name ? g.form.name : g.sp.name;
-  const what = quick.action === 'own' ? 'owned' : 'registered';
+  const what = 'in Pokédex';
   const el = h('div', { class: ['card', 'qe', on ? 'have' : 'miss', !v && 'na'], role: 'listitem',
     style: { '--t1': `var(--ty-${(v || g.vars[0]).form.types[0]})`, '--t2': `var(--ty-${(v || g.vars[0]).form.types[1] || (v || g.vars[0]).form.types[0]})` } },
   h('button', { type: 'button', class: 'qe-tap', disabled: !v, 'aria-pressed': String(on),
@@ -311,7 +305,7 @@ function quickCard(app, g, st) {
 
 function quickTap(app, st, v, el) {
   const was = quickState(v);
-  const op = quick.action === 'own' ? (was ? { owned: 0, for_trade: 0 } : { owned_delta: 1 }) : { registered: was ? 0 : 1 };
+  const op = { registered: was ? 0 : 1 };
   el.classList.toggle('have', !was);                     // answer the tap straight away
   el.classList.toggle('miss', was);
   qeChain = qeChain.then(async () => {
@@ -319,8 +313,8 @@ function quickTap(app, st, v, el) {
       const data = await app.post('quick', { variant_id: v.id, ...op });
       replaceEntries(app.model, [v.id], data.entries);
       const now = quickState(v);
-      if (was && now) toast(`${variantLabel(v)} is still ${quick.action === 'own' ? 'owned' : 'registered'} through its special entries`);
-      else toast(`${variantLabel(v)}: ${now ? '' : 'not '}${quick.action === 'own' ? 'owned' : 'registered'}`, { label: 'Undo', run: () => app.undo(data.batch) });
+      if (was && now) toast(`${variantLabel(v)} is still in the Pokédex through its special entries`);
+      else toast(`${variantLabel(v)}: ${now ? 'added to' : 'taken out of'} the Pokédex`, { label: 'Undo', run: () => app.undo(data.batch) });
     } catch { /* toast shown by post() */ }
     app.renderMain(app.route);                            // repaint counters and this card from the saved state
   });

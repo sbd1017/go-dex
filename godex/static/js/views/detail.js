@@ -1,7 +1,7 @@
 // The species sheet (/dex/<number>): forms, every variant with what you have, special ones, wishes.
-// In admin mode the selected variant gets the quick editor (registered / owned / for trade) and the dialogs.
+// In admin mode the selected variant gets the quick editor (in my Pokédex / for trade) and the dialogs.
 import { h, icon, pad, fmt, toast, copyText, modal } from '../dom.js';
-import { variantHas, variantLabel, formLabel, isSpecial, owned, forTrade } from '../model.js';
+import { variantHas, variantLabel, formLabel, isSpecial, forTrade } from '../model.js';
 import { searchFromQuery } from '../query.js';
 import { sprite, typeChips, entryChips, entryLine, wishCard, pips } from '../components.js';
 import { entryEditor, wishEditor } from '../editors.js';
@@ -64,7 +64,7 @@ function step(app, sp, dir) {
   const all = app.model.species;
   const i = all.indexOf(sp) + dir;
   if (i < 0 || i >= all.length) return;
-  const opts = app.route.mode ? { mode: app.route.mode } : {};
+  const opts = {};
   history.replaceState(null, '', app.root(`/${all[i].dex}`) + searchFromQuery(app.route.text, opts));
   app.onRoute();
 }
@@ -85,7 +85,6 @@ function paint(app, sp) {
   const spVars = sp.variants.filter(visible);
   const haveN = spVars.filter(v => v.target && variantHas(v, mode)).length;
   const targetN = spVars.filter(v => v.target).length;
-  const ownN = sp.variants.reduce((n, v) => n + owned(v), 0);
   const tradeN = sp.variants.reduce((n, v) => n + forTrade(v), 0);
   const heroV = sel || counted[0];
   const types = form.types.length ? form.types : sp.types;
@@ -110,7 +109,7 @@ function paint(app, sp) {
         h('span', { class: 'meta', text: [`Gen ${sp.gen}`, REGION[sp.region], CLASS[sp.class]].filter(Boolean).join(' · ') })))),
   h('div', { class: 'sheet-body' },
     h('div', { class: 'facts' },
-      fact(fmt(ownN), 'owned'), fact(`${haveN}/${targetN}`, mode === 'owned' ? 'variants owned' : 'variants registered'),
+      fact(`${haveN}/${targetN}`, 'variants in the Pokédex'),
       tradeN ? fact(fmt(tradeN), 'for trade', 'f-trade') : null,
       sp.wishes.some(w => w.status === 'open') ? fact(fmt(sp.wishes.filter(w => w.status === 'open').length), 'wished for', 'f-wish') : null),
     sp.forms.length > 1 ? h('section', { class: 'blk' }, h('h3', { text: `Forms · ${sp.forms.length}` }),
@@ -140,11 +139,9 @@ function formChip(app, f, on, mode) {
 
 function tile(app, v, on, mode) {
   const has = variantHas(v, mode);
-  const reg = v.entries.some(e => e.registered);
-  const n = owned(v), t = forTrade(v);
-  let state = 'Missing';
-  if (n) state = `×${n} owned`;
-  else if (reg) state = 'Registered';
+  const t = forTrade(v);
+  let state = has ? 'In Pokédex' : 'Missing';
+  if (t) state += ` · ${t} for trade`;
   if (!v.target && !v.entries.length) state = 'Not counted';
   return h('button', { type: 'button', class: ['vt', has ? 'have' : 'miss', on && 'on', !v.target && 'untracked'], 'aria-pressed': String(on),
     onclick: () => { sheet.varId = v.id; paint(app, v.sp); } },
@@ -161,7 +158,7 @@ function variantPanel(app, v, mode) {
   if (app.admin) {
     const reg = !!plain?.registered;
     const regBySpecial = !reg && v.entries.some(e => e.registered);
-    const pOwned = plain?.owned || 0, pTrade = plain?.trade || 0;
+    const pTrade = plain?.trade || 0;
     const quick = async (op, msg) => {
       try {
         const data = await app.post('quick', { variant_id: v.id, ...op });
@@ -169,10 +166,10 @@ function variantPanel(app, v, mode) {
       } catch { /* toast shown */ }
     };
     body.push(h('div', { class: 'editor' },
-      h('label', { class: 'switch' }, h('input', { type: 'checkbox', checked: reg || regBySpecial, disabled: pOwned > 0,
-        onchange: e => quick({ registered: e.target.checked }, e.target.checked ? 'Registered' : 'Not registered') }),
-      h('span', { class: 'sw' }), h('span', { text: 'Registered' })),
-      stepper('Owned', pOwned, d => quick({ owned_delta: d }, `Owned: ${Math.max(0, pOwned + d)}`), val => quick({ owned: val }, `Owned: ${val}`)),
+      h('label', { class: 'switch', title: regBySpecial ? 'In the Pokédex through a special one below' : '' },
+        h('input', { type: 'checkbox', checked: reg || regBySpecial, disabled: regBySpecial,
+          onchange: e => quick({ registered: e.target.checked }, e.target.checked ? 'Added to the Pokédex' : 'Taken out of the Pokédex') }),
+        h('span', { class: 'sw' }), h('span', { text: 'In my Pokédex' })),
       stepper('For trade', pTrade, d => quick({ trade_delta: d }, `For trade: ${Math.max(0, pTrade + d)}`), val => quick({ for_trade: val }, `For trade: ${val}`)),
       h('div', { class: 'ed-actions' },
         h('button', { class: 'btn', type: 'button', onclick: () => entryEditor(app, { variant: v }) }, icon('plus'), 'Special one'),
@@ -184,13 +181,13 @@ function variantPanel(app, v, mode) {
           } }), h('span', { class: 'sw' }), h('span', { text: 'Counts' }))),
       special.length ? null : h('p', { class: 'hint', text: 'Use "Special one" for an XXL, lucky, hundo, background, or a Pokémon with particular moves.' })));
   }
-  const rows = (app.admin ? special : v.entries.filter(e => isSpecial(e) || e.note)).filter(e => app.admin || e.owned || e.registered);
+  const rows = (app.admin ? special : v.entries.filter(e => isSpecial(e) || e.note)).filter(e => app.admin || e.registered);
   return h('section', { class: 'blk panel' },
     h('h3', {}, variantLabel(v), app.admin ? h('code', { class: 'vid', title: 'Variant id (for imports)', text: v.id })
       : h('span', { class: 'muted', text: variantHas(v, mode) ? '' : ' · missing' })),
     body,
     rows.length ? h('ul', { class: 'entries' }, rows.map(e => entryRow(app, e, { showVariant: false }))) : null,
-    !app.admin && !rows.length ? h('p', { class: 'muted small', text: variantHas(v, mode) ? (owned(v) ? `${owned(v)} owned${forTrade(v) ? `, ${forTrade(v)} available for trade` : ''}.` : 'Registered in the Pokédex.') : 'Not in the collection yet.' }) : null);
+    !app.admin && !rows.length ? h('p', { class: 'muted small', text: variantHas(v, mode) ? `In the Pokédex${forTrade(v) ? `, ${forTrade(v)} available for trade` : ''}.` : 'Not in the Pokédex yet.' }) : null);
 }
 
 function stepper(label, value, onDelta, onSet) {
@@ -215,7 +212,7 @@ function entryRow(app, e, { showVariant = true } = {}) {
 }
 
 function specialList(app, sp) {
-  const list = sp.variants.flatMap(v => v.entries.filter(e => isSpecial(e) && (app.admin || e.owned || e.registered)));
+  const list = sp.variants.flatMap(v => v.entries.filter(e => isSpecial(e) && (app.admin || e.registered)));
   if (!list.length) return null;
   return h('section', { class: 'blk' }, h('h3', { text: `Special ones · ${list.length}` }),
     h('ul', { class: 'entries' }, list.map(e => entryRow(app, e))));

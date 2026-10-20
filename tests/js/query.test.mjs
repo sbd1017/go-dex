@@ -169,3 +169,11 @@ test('GO search strings', async () => {
   assert.deepEqual([...fromQ], [['xxl', 'on'], ['shiny', 'on'], ['shadow', 'not']]);
   assert.deepEqual([...picksFromQuery(parse('hundo', m))], [['4*', 'on']]);
 });
+
+test('one idea of having it: owned, have and registered all mean in your Pokédex', () => {
+  const inDex = run('registered', 'registered');
+  assert.deepEqual(run('owned', 'registered'), inDex);
+  assert.deepEqual(run('have', 'registered'), inDex);
+  assert.ok(inDex.includes('PIKACHU|n|normal|none'), 'transferred Pikachu (registered, none owned) still counts');
+  assert.ok(!run('missing', 'registered').includes('PIKACHU|n|normal|none'));
+});

@@ -30,8 +30,8 @@ form.
 
 | Field | Values |
 |---|---|
-| `registered` | 1 or 0 (owning one always means registered) |
-| `owned`, `for_trade` | counts; `for_trade` can't be more than `owned` |
+| `registered` | 1 (in your Pokédex) or 0; defaults to 1 |
+| `for_trade` | how many you offer; also give `owned` at least that high (the app keeps `owned` only for this) |
 | `size` | `xxs`, `xs`, `xl`, `xxl` |
 | `lucky` | 1 or 0 |
 | `gender` | `male`, `female`, `genderless` |

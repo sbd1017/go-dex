@@ -64,7 +64,6 @@ export function computeStats(m, mode) {
     wishes: { open: open.length, high: open.filter(w => w.priority === 'high').length,
       satisfied: open.filter(w => wishSatisfied(w, m)).length, fulfilled: m.wishes.filter(w => w.status === 'fulfilled').length },
     trade: { kinds: offers.length, count: offers.reduce((n, e) => n + e.trade, 0) },
-    owned: { pokemon: m.entries.reduce((n, e) => n + e.owned, 0) },
   };
 }
 

@@ -139,7 +139,7 @@ export function wishCard(app, w, { onEdit } = {}) {
       h('div', { class: 'wish-top' }, h('span', { class: 'no', text: `#${pad(w.dex)}` }),
         w.priority !== 'normal' ? h('span', { class: `prio prio-${w.priority}`, text: w.priority === 'high' ? 'High' : 'Someday' }) : null,
         w.status !== 'open' ? h('span', { class: 'chip', text: w.status === 'fulfilled' ? 'Got it' : 'Archived' }) : null,
-        got ? h('span', { class: 'chip c-ok', title: 'You own one that matches' }, icon('check'), 'Have one') : null,
+        got ? h('span', { class: 'chip c-ok', title: 'One in your Pokédex matches' }, icon('check'), 'Have one') : null,
         app.admin && !w.public ? h('span', { class: 'chip', text: 'Private' }) : null),
       h('h3', { text: wishTitle(w) }),
       h('div', { class: 'chips' }, wishChips(w, m)),
@@ -167,11 +167,7 @@ export function entryChips(e, m) {
 }
 
 export function entryLine(e) {
-  const counts = [];
-  if (e.owned) counts.push(`${e.owned} owned`);
-  else if (e.registered) counts.push('registered');
-  if (e.trade) counts.push(`${e.trade} for trade`);
-  return counts.join(' · ');
+  return e.trade ? `${e.trade} for trade` : (e.registered ? '' : 'not in the Pokédex');
 }
 
 export { variantLabel, formLabel };

@@ -10,8 +10,7 @@ export function render(main, app) {
       fld('Your name', h('input', { name: 'owner_name', value: s.owner_name, maxlength: 40, placeholder: `Shown as "Name's Pokédex"` })),
       fld('Title', h('input', { name: 'title', value: s.title, maxlength: 60 }))),
     fld('Intro (optional)', h('textarea', { name: 'intro', rows: 2, maxlength: 600 }, s.intro)),
-    h('div', { class: 'row3' },
-      fld('Opens on', h('select', { name: 'default_view' }, ['owned', 'registered'].map(v => h('option', { value: v, selected: s.default_view === v }, v === 'owned' ? 'Owned' : 'Registered')))),
+    h('div', { class: 'row2' },
       fld('Header link text', h('input', { name: 'link_label', value: s.link_label, maxlength: 30, placeholder: 'e.g. GO tools' })),
       fld('Header link', h('input', { name: 'link_url', value: s.link_url, maxlength: 200, placeholder: '/pokemon' }))),
     h('div', { class: 'dlg-actions' }, h('button', { class: 'btn primary', type: 'submit' }, 'Save')));
@@ -28,8 +27,8 @@ export function render(main, app) {
     h('div', { class: 'row3' },
       fld('Variant', h('select', { name: 'variant' }, h('option', { value: 'normal' }, 'Normal'), h('option', { value: 'shiny' }, 'Shiny'),
         h('option', { value: 'shadow' }, 'Shadow'), h('option', { value: 'purified' }, 'Purified'))),
-      fld('Mark as', h('select', { name: 'action' }, h('option', { value: 'register' }, 'Registered'), h('option', { value: 'own' }, 'Owned'),
-        h('option', { value: 'unown' }, 'Not owned'), h('option', { value: 'unregister' }, 'Not registered')))),
+      fld('Then', h('select', { name: 'action' }, h('option', { value: 'register' }, 'Add to my Pokédex'),
+        h('option', { value: 'unregister' }, 'Take out of my Pokédex')))),
     h('div', { class: 'dlg-actions' }, h('button', { class: 'btn primary', type: 'submit' }, 'Apply')));
   paste.addEventListener('submit', async ev => {
     ev.preventDefault();
@@ -39,9 +38,9 @@ export function render(main, app) {
     const variant = d.get('variant');
     const q = parse(`${list.join(' | ')}${variant === 'normal' ? ', !shiny, !shadow, !purified' : `, ${variant}${variant === 'shiny' ? ', !shadow, !purified' : ', !shiny'}`}, !max`, m);
     const unknown = q.chips.filter(c => c.unknown);
-    const ids = m.variants.filter(compileVariants(q, 'owned', m)).filter(v => v.form.kind === 'base' || v.form.sort === 0).map(v => v.id);
+    const ids = m.variants.filter(compileVariants(q, 'registered', m)).filter(v => v.form.kind === 'base' || v.form.sort === 0).map(v => v.id);
     if (!ids.length) { toast(unknown.length ? `Not recognised: ${unknown.map(c => c.text).join(', ')}` : 'Nothing matched'); return; }
-    if (!(await confirmBox(`${d.get('action') === 'register' ? 'Register' : d.get('action') === 'own' ? 'Mark as owned' : 'Update'} ${fmt(ids.length)} Pokémon (${variant})?`, 'Apply'))) return;
+    if (!(await confirmBox(`${d.get('action') === 'register' ? 'Add' : 'Take out'} ${fmt(ids.length)} Pokémon (${variant})?`, 'Apply'))) return;
     try { const data = await app.post('bulk', { variant_ids: ids, action: d.get('action') }); await app.saved(data, `${fmt(data.changed)} updated`); paste.reset(); } catch { /* */ }
   });
 

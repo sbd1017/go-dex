@@ -4,7 +4,7 @@
 
 First release.
 
-* Pokédex grid with silhouettes, type-tinted cards and collection icons; Owned and Registered views; floating
+* Pokédex grid with silhouettes, type-tinted cards and collection icons; one simple "in your Pokédex" rule; floating
   region picker; species and forms grouping.
 * Variant-level records: forms, costumes, regional forms, Megas, Gigantamax, Dynamax, shiny, Shadow and
   Purified, with per-Pokémon details (size, lucky, IVs, background, gender, moves, CP, notes).

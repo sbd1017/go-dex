@@ -20,7 +20,7 @@ export const app = {
   // ---------------------------------------------------------------- urls
   root(path = '') { return CFG.base + (CFG.admin ? '/admin' : '') + path; },
   publicUrl(path = '', search = '') { return location.origin + CFG.base + path + search; },
-  get mode() { return this.route?.mode || this.model?.settings.default_view || 'owned'; },
+  mode: 'registered',                                   // one idea of "have": it's in your Pokédex
 
   parseRoute() {
     let rel = location.pathname.slice(CFG.base.length) || '/';
@@ -30,13 +30,12 @@ export const app = {
     let view = 'dex', dex = null;
     if (/^\d+$/.test(seg[0] || '')) dex = +seg[0];
     else if (seg[0] && VIEWS[seg[0]] && (seg[0] !== 'data' || CFG.admin)) view = seg[0];
-    return { view, dex, text: q.text || '', mode: q.mode || null, group: q.group || null, sort: q.sort || null, form: q.f || null };
+    return { view, dex, text: q.text || '', group: q.group || null, sort: q.sort || null, form: q.f || null };
   },
 
-  href(view, { text = '', dex = null, form = null, keepMode = true } = {}) {
+  href(view, { text = '', dex = null, form = null } = {}) {
     const path = dex ? `/${dex}` : (view === 'dex' ? '/' : `/${view}`);
     const opts = {};
-    if (keepMode && this.route?.mode) opts.mode = this.route.mode;
     if (view === 'dex' && this.route?.group) opts.group = this.route.group;
     if (form) opts.f = form;
     return this.root(path) + searchFromQuery(text, opts);
@@ -53,7 +52,6 @@ export const app = {
   setQuery(text, { push = false } = {}) {
     const r = this.route;
     const opts = {};
-    if (r.mode) opts.mode = r.mode;
     if (r.group && r.view === 'dex') opts.group = r.group;
     if (r.sort) opts.sort = r.sort;
     const path = r.dex ? `/${r.dex}` : (r.view === 'dex' ? '/' : `/${r.view}`);
@@ -65,8 +63,7 @@ export const app = {
 
   setOption(key, value) {
     const r = this.route;
-    const opts = { mode: r.mode, group: r.group, sort: r.sort, [key]: value };
-    if (opts.mode === (this.model.settings.default_view || 'owned')) opts.mode = null;
+    const opts = { group: r.group, sort: r.sort, [key]: value };
     const clean = Object.fromEntries(Object.entries(opts).filter(([, v]) => v));
     const path = r.dex ? `/${r.dex}` : (r.view === 'dex' ? '/' : `/${r.view}`);
     history.replaceState(null, '', this.root(path) + searchFromQuery(r.text, clean));
@@ -122,7 +119,7 @@ export const app = {
   onRoute() {
     const prev = this.route;
     this.route = this.parseRoute();
-    if (!prev || prev.view !== this.route.view || prev.mode !== this.route.mode) this.renderShell();
+    if (!prev || prev.view !== this.route.view) this.renderShell();
     this.renderMain(prev);
     detailView.sync(this);
   },
@@ -160,21 +157,15 @@ export const app = {
   renderShell() {
     const s = this.model.settings;
     const header = document.getElementById('top');
-    const mode = this.mode;
     const tabs = [...TABS, ...(CFG.admin ? [['data', '/data', 'Data', 'gear']] : [])];
     const tabLinks = cls => tabs.map(([v, path, label, ic]) => h('a', {
-      class: [cls, this.route.view === v && 'on'], href: this.root(path) + (this.lastQuery[v] ? searchFromQuery(this.lastQuery[v], this.route.mode ? { mode: this.route.mode } : {}) : (this.route.mode ? `?mode=${this.route.mode}` : '')),
+      class: [cls, this.route.view === v && 'on'], href: this.root(path) + (this.lastQuery[v] ? searchFromQuery(this.lastQuery[v]) : ''),
       'aria-current': this.route.view === v ? 'page' : null, 'aria-label': label, title: label, 'data-nav': '1' }, icon(ic), h('span', { text: label })));
-    const modeSwitch = h('div', { class: 'seg mode', role: 'group', 'aria-label': 'What counts as having one' },
-      ['owned', 'registered'].map(m => h('button', {
-        type: 'button', class: mode === m ? 'on' : '', 'aria-pressed': String(mode === m),
-        title: m === 'owned' ? 'Pokémon I have right now' : 'In my Pokédex, even if transferred',
-        onclick: () => this.setOption('mode', m) }, m === 'owned' ? 'Owned' : 'Registered')));
     header.replaceChildren(h('div', { class: 'top-in' },
       h('a', { class: 'brand', href: this.root('/'), 'data-nav': '1' }, h('span', { class: 'ball' }, icon('ball')),
         h('span', { class: 'brand-t' }, s.owner_name ? h('small', { text: `${s.owner_name}'s` }) : null, h('b', { text: s.title || 'Pokédex' }))),
       h('nav', { class: 'tabs-top', 'aria-label': 'Sections' }, tabLinks('tab')),
-      h('div', { class: 'top-r' }, modeSwitch,
+      h('div', { class: 'top-r' },
         CFG.admin ? h('button', { class: 'iconbtn', type: 'button', title: 'Undo the last change', 'aria-label': 'Undo', onclick: () => this.undo() }, icon('undo')) : null,
         h('button', { class: 'iconbtn', type: 'button', title: 'Light / dark', 'aria-label': 'Switch theme', onclick: toggleTheme }, icon('theme')),
         // Everyone sees the cog; on the public page it leads to the editing page (which asks you to sign in first)

@@ -176,10 +176,11 @@ def create_app(cfg: config.Config | None = None) -> FastAPI:
         elif rest.isdigit():
             sp = conn.execute("SELECT dex, name FROM species WHERE dex = ?", (int(rest),)).fetchone()
             if sp:
-                owned = q("""SELECT coalesce(sum(e.owned), 0) FROM entries e JOIN variants v ON v.id = e.variant_id
-                             JOIN forms f ON f.id = v.form_id WHERE f.dex = ?""", sp["dex"])
+                have = q("""SELECT count(DISTINCT v.id) FROM entries e JOIN variants v ON v.id = e.variant_id
+                            JOIN forms f ON f.id = v.form_id WHERE f.dex = ? AND e.registered = 1""", sp["dex"])
                 title = f"#{sp['dex']:03d} {sp['name']} · {dex_title}"
-                desc = f"{owned} owned." if owned else f"{sp['name']} is not in the collection yet."
+                desc = (f"{have} variant{'s' if have != 1 else ''} in the Pokédex." if have
+                        else f"{sp['name']} is not in the Pokédex yet.")
                 f = conn.execute("SELECT * FROM forms WHERE dex = ? ORDER BY kind != 'base', sort LIMIT 1", (sp["dex"],)).fetchone()
                 sprites.refresh()
                 file = sprites.for_form(f, f["image"])[0] if f else None

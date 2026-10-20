@@ -30,10 +30,9 @@ export const TERMS = [];
 const def = t => { TERMS.push(t); return t; };
 
 // ---- states (what you have) -------------------------------------------------
-def({ key: 'owned', aliases: ['own', 'have', 'got'], group: 'Collection', label: 'Owned', state: true,
-  help: 'You currently have one', entry: e => e.owned > 0, wish: (w, c) => wishSatisfied(w, c.model) });
-def({ key: 'registered', aliases: ['reg', 'caught', 'seen'], group: 'Collection', label: 'Registered', state: true,
-  help: 'In your Pokédex (even if transferred)', entry: e => e.registered, wish: (w, c) => wishSatisfied(w, c.model) });
+def({ key: 'have', aliases: ['registered', 'owned', 'own', 'got', 'reg', 'caught', 'seen'], group: 'Collection',
+  label: 'In your Pokédex', state: true, help: 'You have it in your Pokédex', entry: e => e.registered,
+  wish: (w, c) => wishSatisfied(w, c.model) });
 def({ key: 'trade', aliases: ['fortrade', 'tradeable', 'tradable', 'offer'], group: 'Collection', label: 'For trade',
   state: true, help: 'Available for trade', entry: e => e.trade > 0, wish: () => false });
 def({ key: 'missing', aliases: ['need', 'needed', 'unregistered', 'todo'], group: 'Collection', label: 'Missing', special: 'missing',
@@ -214,7 +213,7 @@ const isEntryAtom = a => !!a.def.entry && !a.def.species && !a.def.variant && !a
 
 /**
  * Compile a parsed query into a test for variants.
- * mode: 'owned' | 'registered' decides what "have" means unless the query says owned/registered/trade itself.
+ * mode: what "have" means: 'registered' (in your Pokédex, what the app uses) or 'owned' (still has a count).
  */
 export function compileVariants(q, mode, model) {
   const ctx = { model, mode };
@@ -267,7 +266,7 @@ export function compileWishes(q, model) {
 
 /** Test for trade offers: one owned entry with for_trade > 0. */
 export function compileOffers(q, model) {
-  const ctx = { model, mode: 'owned' };
+  const ctx = { model, mode: 'registered' };
   return e => q.terms.every(t => t.atoms.some(a => {
     let r;
     if (a.def.special === 'missing') r = false;

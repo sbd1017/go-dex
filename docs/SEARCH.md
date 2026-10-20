@@ -23,7 +23,7 @@ search text, and the address bar always holds the search, so any view can be sha
 
 Generated from the registry in `godex/static/js/query.js` (the ? next to the search box lists them all):
 
-* **Collection:** `owned`, `registered`, `trade`, `missing`, `wish`, `unreleased`
+* **Collection:** `have` (also `owned`, `registered`), `trade`, `missing`, `wish`, `unreleased`
 * **Variant:** `shiny`, `shadow`, `purified`, `dynamax`, `gigantamax` (`gmax`), `max`
 * **Details:** `xxl`, `xl`, `xs`, `xxs`, `lucky`, `perfect` (`hundo`, `4*`), `background`,
   `locationbackground`, `specialbackground`, `female`, `male`
@@ -34,14 +34,14 @@ Generated from the registry in `godex/static/js/query.js` (the ? next to the sea
 
 ## How "have" and "missing" work
 
-The Owned / Registered switch decides what "have" means. Detail words are about one Pokémon, so
+"Have" means it is in your Pokédex. Detail words are about one Pokémon, so
 `xxl, shiny` means "a shiny that is also XXL", not "any shiny and any XXL".
 
 * `shiny, missing`: shiny variants that count towards completion where you have none.
 * `xxl, missing`: variants where you have no XXL.
 * `background, missing`: backgrounds on your wishlist that nothing you own satisfies yet.
-* `!xxl`: no XXL. `!owned`: none owned.
-* `owned`, `registered` or `trade` in the search override the switch for that search.
+* `!xxl`: no XXL. `!have`: not in your Pokédex.
+* `trade` means at least one is offered for trade.
 
 ## Adding a word
 

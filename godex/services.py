@@ -18,7 +18,7 @@ SPECIMEN_FIELDS = ("gender", "size", "lucky", "iv_atk", "iv_def", "iv_sta", "bac
 WISH_FIELDS = ("dex", "form_id", "shiny", "alignment", "max", "gender", "size", "lucky", "min_iv_atk", "min_iv_def",
                "min_iv_sta", "background", "background_id", "moves", "title", "note", "private_note", "priority",
                "status", "public")
-SETTINGS = {"owner_name": "", "title": "Pokédex", "intro": "", "default_view": "owned", "link_label": "", "link_url": ""}
+SETTINGS = {"owner_name": "", "title": "Pokédex", "intro": "", "link_label": "", "link_url": ""}
 
 
 class Invalid(ValueError):
@@ -226,8 +226,8 @@ def quick(conn, batch, variant_id: str, op: dict) -> None:
     reg, owned, trade = (e["registered"], e["owned"], e["for_trade"]) if e else (0, 0, 0)
     if "registered" in op:
         reg = _bool(op["registered"])
-        if not reg and owned:
-            raise Invalid("Set owned to 0 first: a Pokémon you own is always registered")
+        if not reg:                        # out of the Pokédex: nothing left to offer either
+            owned = trade = 0
     if "owned" in op:
         owned = _int(op["owned"], 0, 9999, "owned", nullable=False)
         trade = min(trade, owned)          # an explicit owned count wins over what was offered
@@ -272,7 +272,7 @@ def bulk(conn, batch, variant_ids: list[str], action: str) -> int:
             quick(conn, batch, vid, {"owned": 0, "for_trade": 0})
         elif action == "untrade" and e and e["for_trade"]:
             quick(conn, batch, vid, {"for_trade": 0})
-        elif action == "unregister" and e and e["registered"] and not e["owned"]:
+        elif action == "unregister" and e and e["registered"]:
             quick(conn, batch, vid, {"registered": 0})
         else:
             continue
@@ -298,8 +298,8 @@ def describe_variant(conn, vid: str) -> str:
 def describe_entry(conn, e: dict) -> str:
     extra = [x for x in (e.get("size", "").upper(), "Lucky" if e.get("lucky") else "",
                          e.get("gender", "").title(), "Background" if e.get("background_id") else "") if x]
-    counts = f"owned {e['owned']}" + (f", {e['for_trade']} for trade" if e["for_trade"] else "") \
-        if e["owned"] else ("registered" if e["registered"] else "not registered")
+    counts = ("in the Pokédex" if e["registered"] else "not in the Pokédex") + \
+        (f", {e['for_trade']} for trade" if e["for_trade"] else "")
     return f"{describe_variant(conn, e['variant_id'])}{' · ' + ' '.join(extra) if extra else ''}: {counts}"
 
 
@@ -443,7 +443,7 @@ def save_background(conn, batch, name: str, kind: str, bg_id: str | None = None)
 
 def get_settings(conn) -> dict:
     out = dict(SETTINGS)
-    out.update({r[0]: r[1] for r in conn.execute("SELECT key, value FROM settings")})
+    out.update({r[0]: r[1] for r in conn.execute("SELECT key, value FROM settings") if r[0] in SETTINGS})
     return out
 
 
@@ -456,10 +456,6 @@ def save_settings(conn, batch, data: dict) -> dict:
             value = _text(data[key], limit, key.replace("_", " "))
             conn.execute("INSERT INTO settings VALUES (?, ?) ON CONFLICT (key) DO UPDATE SET value = excluded.value",
                          (key, value))
-    if "default_view" in data:
-        value = _choice(data["default_view"], ("owned", "registered"), "default view")
-        conn.execute("INSERT INTO settings VALUES ('default_view', ?) ON CONFLICT (key) DO UPDATE SET value = excluded.value",
-                     (value,))
     after = get_settings(conn)
     record(conn, batch, "update", "settings", "settings", current, after, "Settings")
     return after

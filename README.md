@@ -1,8 +1,8 @@
 # godex
 
-A searchable Pokémon GO collection Pokédex you can host yourself. It shows what you own, what you have
-registered, what you are missing, what you want and what you have for trade, down to the level of
-"shiny XXL Pikachu with the Madrid background".
+A searchable Pokémon GO collection Pokédex you can host yourself. It shows what is in your Pokédex, what you
+are missing, what you want and what you have for trade, down to the level of "shiny XXL Pikachu with the
+Madrid background".
 
 The public page is read only, so you can send people a link instead of answering "do you have this shiny?"
 for the hundredth time. Editing happens on a private admin page that works well on a phone, so you can
@@ -15,8 +15,8 @@ included (see [Images](#images)).
 
 * **Pokédex** grid that feels like the in-game one: silhouettes for what you don't have, type-tinted cards
   for what you do, small icons for shiny, shadow, lucky, XXL, backgrounds, costumes, wishlist and trade.
-* **Owned and Registered are different things.** Switch between them at the top: registered means it is in
-  your Pokédex even if you transferred it.
+* **One simple rule**, like the game: if it's in your Pokédex, you have it. Costumes, forms and backgrounds are
+  all on each Pokémon's own page.
 * **Variant-level records.** Every form, costume, regional form, Mega, Gigantamax, shiny, Shadow and Purified
   version is tracked separately, and each individual Pokémon can carry size, lucky, IVs, background, gender,
   moves, CP and notes.
@@ -34,7 +34,7 @@ included (see [Images](#images)).
   Gigantamax, backgrounds and per-generation progress. Every number opens the matching search.
 * **Trade compare**: a visitor types what they have and what they want, and sees which of theirs are on your
   wishlist (and what still needs checking, like "needs XXL") and which of their wants you can offer.
-* **Admin**: quick toggles (registered, owned -/+, for trade -/+), a quick-entry mode where tapping a card marks
+* **Admin**: quick toggles (in my Pokédex, for trade -/+), a quick-entry mode where tapping a card marks
   it, special Pokémon, wishes, bulk actions on any search result, paste a list of Pokédex numbers, JSON/CSV
   export, a repeatable JSON import with a dry run ([docs/IMPORT.md](docs/IMPORT.md)), and undo for every change.
 * **Phone friendly**: designed for the iPhone first, a floating region picker, Add to Home Screen, and link
@@ -80,8 +80,7 @@ admin page.
 ## How the data is shaped
 
 Species -> forms -> variants (form × shiny × normal/Shadow/Purified × none/Dynamax/Gigantamax) -> entries.
-An entry is one or more Pokémon you have or had, with registered / owned / for-trade counts and the
-per-Pokémon details. Wishes are separate rows where an empty requirement means "any". The full reasoning is in
+An entry is a Pokémon in your Pokédex, with how many you offer for trade and the per-Pokémon details. Wishes are separate rows where an empty requirement means "any". The full reasoning is in
 [docs/SCHEMA.md](docs/SCHEMA.md), and the search language is in [docs/SEARCH.md](docs/SEARCH.md).
 
 ## Development
