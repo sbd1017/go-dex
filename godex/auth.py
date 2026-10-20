@@ -4,8 +4,8 @@ DEX_AUTH=site      Behind a reverse proxy that already authenticated the owner (
                    X-Site-User / X-Site-CSRF / X-Site-Expires. Trusted only from a loopback peer (see site_auth.py).
 DEX_AUTH=password  A single admin password. Only its scrypt hash is stored (var/admin.json, or the env var
                    DEX_ADMIN_PASSWORD_HASH). Sessions are signed, expiring cookies carrying their own CSRF token.
-DEX_AUTH=none      No login at all. For local development only: the server refuses to listen on anything but
-                   127.0.0.1 in this mode.
+DEX_AUTH=none      No login at all: anyone can edit. For local development, or a public demo that resets itself.
+                   The server refuses to listen on anything but 127.0.0.1 in this mode (put a reverse proxy in front).
 """
 import base64
 import hashlib

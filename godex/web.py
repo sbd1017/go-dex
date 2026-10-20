@@ -6,6 +6,7 @@ Everything that changes data is a POST under /api/admin/, checked for a session,
 """
 import hmac
 import json
+import os
 import logging
 import pathlib
 import re
@@ -125,7 +126,7 @@ def create_app(cfg: config.Config | None = None) -> FastAPI:
     # -------------------------------------------------------------- pages
     def page(request: Request, admin: bool) -> HTMLResponse:
         nonlocal static_version
-        if cfg.auth == "none":                       # local development: pick up edited files without a restart
+        if os.environ.get("DEX_DEV") == "1":          # local development: pick up edited files without a restart
             static_version = _static_version()
         session = request.state.session
         with db.read() as conn:
