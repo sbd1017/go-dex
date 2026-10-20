@@ -139,6 +139,8 @@ with db.write() as conn:
                                                   "Search it like the in-game Pokédex: try \"shiny, missing\" or \"xxl\"."),
         "link_label": os.environ.get("DEX_DEMO_LINK_LABEL", ""), "link_url": os.environ.get("DEX_DEMO_LINK_URL", ""),
     })
+    # The seed is not anyone's edit: keep it out of the history, so Undo can't wipe the demo.
+    conn.execute("DELETE FROM changes WHERE batch = ?", (batch,))
     counts = q("SELECT count(*), coalesce(sum(owned), 0), coalesce(sum(for_trade), 0) FROM entries")[0]
     print(f"demo collection: {counts[0]} entries, {counts[1]} Pokémon owned, {counts[2]} for trade, "
           f"{q('SELECT count(*) FROM wishes')[0][0]} wishes")
