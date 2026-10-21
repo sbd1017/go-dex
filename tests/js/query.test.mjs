@@ -17,6 +17,7 @@ function dataset() {
     sp(150, 'Mewtwo', 1, 'kanto', ['psychic'], { class: 'legendary' }),
     sp(151, 'Mew', 1, 'kanto', ['psychic'], { class: 'mythical', sizes: 0, lucky: 0 }),   // no size records, untradable
     sp(484, 'Palkia', 4, 'sinnoh', ['water', 'dragon'], { class: 'legendary' }),
+    sp(764, 'Comfey', 7, 'alola', ['fairy'], { regional: 1 }),                               // regional exclusive
   ];
   const forms = [
     form('BULBASAUR', 1, 'base', '', { types: ['grass', 'poison'] }),
@@ -30,6 +31,7 @@ function dataset() {
     form('MEW', 151, 'base', '', { types: ['psychic'] }),
     form('PALKIA', 484, 'base', '', { types: ['water', 'dragon'] }),
     form('PALKIA_ORIGIN', 484, 'alternate', 'Origin Forme', { types: ['water', 'dragon'] }),
+    form('COMFEY', 764, 'base', '', { types: ['fairy'] }),
   ];
   const variants = [];
   forms.forEach((f, i) => {
@@ -81,7 +83,7 @@ test('missing works per Pokémon: any shiny covers the shiny entry, like the gam
   assert.ok(!r.some(id => id.startsWith('PIKACHU')), 'a shiny Pikachu covers shiny Shadow and shiny costume too');
   assert.ok(r.includes('MEWTWO|s|normal|none') && r.includes('MEWTWO|s|shadow|none'));
   assert.ok(run('costume, shiny, missing', 'registered').includes('PIKACHU_VS_2019|s|normal|none'), 'costumes count one by one');
-  assert.deepEqual(dexes('missing'), [151], 'only Mew has nothing registered at all');
+  assert.deepEqual(dexes('missing'), [151, 764], 'only Mew and Comfey have nothing registered at all');
 });
 test('shadow, missing', () => assert.ok(run('shadow, missing').every(id => id.includes('|shadow|'))));
 test('xxl, shiny -> shiny XXL owned', () => assert.deepEqual(run('xxl, shiny'), ['PALKIA|s|normal|none']));
@@ -114,6 +116,11 @@ test('mega, xxl: the XXL is the Pokémon that Mega Evolves', () => {
   assert.deepEqual(run('mega, xxl', 'registered'), ['MEWTWO_MEGA_X|n|normal|none', 'MEWTWO_MEGA_Y|n|normal|none']);
   assert.deepEqual(run('mega, hundo', 'registered'), ['MEWTWO_MEGA_Y|n|normal|none'], 'recorded on Mega Y: only Mega Y');
   assert.deepEqual(run('mega, have', 'registered'), ['MEWTWO_MEGA_Y|n|normal|none']);
+});
+test('regional = regional forms and regional exclusives', () => {
+  assert.deepEqual(dexes('regional'), [26, 764]);
+  assert.deepEqual(dexes('regionalform'), [26]);
+  assert.deepEqual(dexes('exclusive'), [764]);
 });
 test('OR with |', () => assert.deepEqual(dexes('pikachu | raichu'), [25, 26]));
 test('exact name wins: mew is not mewtwo', () => assert.deepEqual(dexes('mew'), [151]));

@@ -214,15 +214,16 @@ function entryRow(app, e, { showVariant = true } = {}) {
 /** What the game can record for this species. Off = never counted as missing or in the totals. */
 function recordSwitches(app, sp) {
   const sw = (rec, label) => h('label', { class: 'switch sm' },
-    h('input', { type: 'checkbox', checked: canHave(sp, rec), onchange: async e => {
+    h('input', { type: 'checkbox', checked: rec === 'regional' ? !!sp.regional : canHave(sp, rec), onchange: async e => {
       try {
         await app.saved(await app.post('species/record', { dex: sp.dex, record: rec, value: e.target.checked ? 1 : 0 }),
-          `${sp.name} ${e.target.checked ? 'can' : "can't"} ${rec === 'sizes' ? 'be XXS / XXL' : 'be lucky'}`);
+          rec === 'regional' ? `${sp.name}: ${e.target.checked ? 'regional exclusive' : 'not a regional exclusive'}`
+            : `${sp.name} ${e.target.checked ? 'can' : "can't"} ${rec === 'sizes' ? 'be XXS / XXL' : 'be lucky'}`);
       } catch { /* toast shown */ }
     } }), h('span', { class: 'sw' }), h('span', { text: label }));
   return h('section', { class: 'blk' }, h('h3', { text: 'In the game' }),
-    h('div', { class: 'ed-actions' }, sw('sizes', 'Can be XXS / XXL'), sw('lucky', 'Can be lucky')),
-    h('p', { class: 'hint', text: 'Turn off what the game never records for this Pokémon, so "missing" searches and totals skip it.' }));
+    h('div', { class: 'ed-actions' }, sw('sizes', 'Can be XXS / XXL'), sw('lucky', 'Can be lucky'), sw('regional', 'Regional exclusive')),
+    h('p', { class: 'hint', text: 'Turn off what the game never records for this Pokémon, so "missing" searches and totals skip it. Regional exclusives show up when you search "regional".' }));
 }
 
 function wishList(app, sp, form) {

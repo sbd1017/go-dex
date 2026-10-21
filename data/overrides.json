@@ -59,6 +59,10 @@
     "LC_SPECIALBACKGROUND_TEAM_RED": "Team Valor",
     "LC_SPECIALBACKGROUND_TEAM_YELLOW": "Team Instinct"
   },
+  "_regional_species": "Regional exclusives in Pokémon GO (caught only in some parts of the world, or with region-locked forms such as Vivillon patterns). Search: regional, exclusive. Correct any one on its Pokémon page.",
+  "regional_species": [83, 115, 122, 128, 214, 222, 313, 314, 324, 335, 336, 337, 338, 357, 369, 417, 422, 423, 441, 455,
+                       480, 481, 482, 511, 512, 513, 514, 515, 516, 538, 539, 550, 556, 561, 626, 631, 632, 666, 669, 670,
+                       671, 701, 707, 741, 764, 794, 795, 797, 798, 805, 806],
   "_missing_species": "Species the sources don't fully describe yet (e.g. in the game files but not released). Added as unreleased unless 'released' is set.",
   "missing_species": {
     "902": {

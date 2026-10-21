@@ -27,7 +27,7 @@ Generated from the registry in `godex/static/js/query.js` (the ? next to the sea
 * **Variant:** `shiny`, `shadow`, `purified`, `dynamax`, `gigantamax` (`gmax`), `max`
 * **Details:** `xxl`, `xl`, `xs`, `xxs`, `lucky`, `perfect` (`hundo`, `4*`), `background`,
   `locationbackground`, `specialbackground`, `female`, `male`
-* **Form:** `costume`, `event`, `clone`, `regional`, `alolan`, `galarian`, `hisuian`, `paldean`, `mega`, `form`
+* **Form:** `costume`, `event`, `clone`, `regional` (regional forms and regional exclusives such as Comfey), `regionalform`, `exclusive`, `alolan`, `galarian`, `hisuian`, `paldean`, `mega`, `form`
 * **Pokémon:** `legendary`, `mythical`, `ultrabeast`, regions (`kanto` ... `paldea`, `hisui`), `gen1` ... `gen9`,
   the 18 types
 * **Wishlist:** `high`, `someday`, `open`, `fulfilled`, `archived`

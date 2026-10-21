@@ -96,16 +96,16 @@ def load(db: Database, path: pathlib.Path) -> dict:
         conn.execute("UPDATE species SET in_catalog = 0")
         conn.executemany(
             """INSERT INTO species (dex, code, name, generation, region, family, class, type1, type2, gender_diff,
-                                    released, shiny, shadow, gmax, dynamax, sizes, lucky, in_catalog)
+                                    released, shiny, shadow, gmax, dynamax, sizes, lucky, regional, in_catalog)
                VALUES (:dex, :code, :name, :gen, :region, :family, :class, :type1, :type2, :gender_diff,
-                       :released, :shiny, :shadow, :gmax, :dynamax, :sizes, :lucky, 1)
+                       :released, :shiny, :shadow, :gmax, :dynamax, :sizes, :lucky, :regional, 1)
                ON CONFLICT (dex) DO UPDATE SET code = excluded.code, name = excluded.name,
                    generation = excluded.generation, region = excluded.region, family = excluded.family,
                    class = excluded.class, type1 = excluded.type1, type2 = excluded.type2,
                    gender_diff = excluded.gender_diff, released = excluded.released, shiny = excluded.shiny,
                    shadow = excluded.shadow, gmax = excluded.gmax, dynamax = excluded.dynamax, sizes = excluded.sizes,
-                   lucky = excluded.lucky, in_catalog = 1""",
-            [{"sizes": True, "lucky": True} | s | {"type1": s["types"][0], "type2": (s["types"] + [None])[1]}
+                   lucky = excluded.lucky, regional = excluded.regional, in_catalog = 1""",
+            [{"sizes": True, "lucky": True, "regional": False} | s | {"type1": s["types"][0], "type2": (s["types"] + [None])[1]}
              for s in cat["species"]])
 
         conn.execute("UPDATE forms SET in_catalog = 0")

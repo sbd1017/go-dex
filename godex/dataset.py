@@ -34,6 +34,7 @@ def build(conn, sprites, admin: bool) -> dict:
             "gmax": s["gmax"], "dmax": s["dynamax"],
             "sizes": s["sizes"] if s["sizes_override"] is None else s["sizes_override"],
             "lucky": s["lucky"] if s["lucky_override"] is None else s["lucky_override"],
+            "regional": s["regional"] if s["regional_override"] is None else s["regional_override"],
         })
     forms, form_index = [], {}
     base_image = {r[0]: r[1] for r in conn.execute(

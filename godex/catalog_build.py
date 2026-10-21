@@ -147,6 +147,7 @@ def build(src: dict, ov: dict) -> dict:
     gaps = sorted(set(range(1, max(api) + 1)) - set(api))
     if gaps:
         print(f"warning: no data for Pokédex numbers {gaps}", file=sys.stderr)
+    regional = set(ov.get("regional_species", []))
     species, forms = [], []
     asset_misses = 0
     unmatched_shiny = []
@@ -166,6 +167,7 @@ def build(src: dict, ov: dict) -> dict:
             "dynamax": False,
             "sizes": True,                               # XXS / XXL records (overrides turn it off, e.g. Mew)
             "lucky": bool(base_ps.get("isTradable")) if base_ps else True,  # only tradable ones can be lucky
+            "regional": dex in regional,                     # regional exclusive (list in overrides)
         }
         sp.update(ov["species"].get(str(dex), {}))
         species.append(sp)

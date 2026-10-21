@@ -288,3 +288,7 @@ def test_species_records(client):
     client.post("/dex/api/admin/undo", json={})
     assert sp(25)["sizes"] == 1
     assert client.post("/dex/api/admin/species/record", json={"dex": 25, "record": "shiny", "value": 0}).status_code == 400
+    assert sp(764)["regional"] == 1 and sp(25)["regional"] == 0         # Comfey is a regional exclusive
+    assert client.post("/dex/api/admin/species/record", json={"dex": 25, "record": "regional", "value": 1}).json()["ok"]
+    assert sp(25)["regional"] == 1
+    client.post("/dex/api/admin/undo", json={})

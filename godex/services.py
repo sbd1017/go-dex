@@ -420,13 +420,13 @@ def set_target(conn, batch, variant_id: str, target):
            f"{describe_variant(conn, variant_id)}: counts towards completion = {'auto' if value is None else bool(value)}")
 
 
-SPECIES_RECORDS = {"sizes": "can be XXS / XXL", "lucky": "can be lucky"}
+SPECIES_RECORDS = {"sizes": "can be XXS / XXL", "lucky": "can be lucky", "regional": "regional exclusive"}
 
 
 def set_species_record(conn, batch, dex, record_name: str, value):
-    """Whether the game keeps a record (sizes, lucky) for a species. None/'auto' follows the catalog."""
+    """Species facts you can correct: sizes, lucky (records the game keeps), regional. None/'auto' = catalog."""
     if record_name not in SPECIES_RECORDS:
-        raise Invalid("Record must be sizes or lucky")
+        raise Invalid("Record must be sizes, lucky or regional")
     col = f"{record_name}_override"
     dex = _int(dex, 1, 9999, "dex", nullable=False)
     sp = _row(conn, f"SELECT dex, name, {col} FROM species WHERE dex = ?", (dex,))
@@ -514,7 +514,7 @@ def undo(conn, batch: str | None = None) -> dict:
             conn.execute("UPDATE variants SET target_override = ? WHERE id = ?",
                          (before["target_override"] if before else None, r["entity_id"]))
         elif r["entity"] == "species":
-            for col in ("sizes_override", "lucky_override"):
+            for col in (f"{k}_override" for k in SPECIES_RECORDS):
                 if col in (json.loads(r["after"]) if r["after"] else {}):
                     conn.execute(f"UPDATE species SET {col} = ? WHERE dex = ?",
                                  ((before or {}).get(col), int(r["entity_id"])))
@@ -555,9 +555,9 @@ def export(conn) -> dict:
         "wishes": [{k: v for k, v in w.items() if k != "id"} for w in wishes],
         "variant_targets": {r[0]: r[1] for r in conn.execute(
             "SELECT id, target_override FROM variants WHERE target_override IS NOT NULL")},
-        "species_records": {str(r[0]): {k: r[k] for k in ("sizes", "lucky") if r[k] is not None} for r in conn.execute(
-            "SELECT dex, sizes_override AS sizes, lucky_override AS lucky FROM species "
-            "WHERE sizes_override IS NOT NULL OR lucky_override IS NOT NULL")},
+        "species_records": {str(r["dex"]): {k: r[f"{k}_override"] for k in SPECIES_RECORDS if r[f"{k}_override"] is not None}
+                            for r in conn.execute("SELECT * FROM species WHERE " + " OR ".join(
+                                f"{k}_override IS NOT NULL" for k in SPECIES_RECORDS))},
         "custom_backgrounds": [dict(r) for r in conn.execute(
             "SELECT id, name, kind, year FROM backgrounds WHERE custom = 1")],
         "tags": [dict(r) for r in conn.execute("SELECT slug, label, description FROM tags ORDER BY slug")],

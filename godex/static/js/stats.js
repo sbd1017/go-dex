@@ -41,7 +41,7 @@ export function computeStats(m, mode) {
     entryMetric('xxl', 'XXL', 'xxl', e => e.size === 'xxl', 'sizes'),
     entryMetric('xxs', 'XXS', 'xxs', e => e.size === 'xxs', 'sizes'),
     formMetric('costume', 'Costumes', 'costume', 'costume'),
-    formMetric('regional', 'Regional forms', 'regional', 'regional'),
+    formMetric('regional', 'Regional forms', 'regionalform', 'regional'),
     formMetric('alternate', 'Other forms', 'form, !costume, !regional, !mega', 'alternate'),
     formMetric('mega', 'Mega & Primal', 'mega', 'mega'),
     speciesMetric('gmax', 'Gigantamax', 'gigantamax', v => v.max === 'gigantamax'),

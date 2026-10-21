@@ -80,7 +80,14 @@ const formTerm = (key, aliases, label, test, help) => def({ key, aliases, group:
 formTerm('costume', ['costumes', 'costumed', 'hat'], 'Costume', f => f.kind === 'costume');
 formTerm('event', ['events'], 'Event forms', f => f.kind === 'costume' || f.kind === 'event', 'Costumes and other event forms');
 formTerm('clone', ['copy'], 'Clone', f => f.code === 'COPY_2019');
-formTerm('regional', ['regionals', 'regionalform'], 'Regional form', f => f.kind === 'regional');
+// "Regional" in GO means both: regional forms (Alolan Vulpix) and regional exclusives (Comfey, Heracross ...).
+const isRegional = f => f.kind === 'regional' || !!f.sp?.regional;
+def({ key: 'regional', aliases: ['regionals'], group: 'Form', label: 'Regional', form: true,
+  help: 'Regional forms (Alolan, Galarian ...) and regional exclusives (Comfey, Heracross ...)',
+  species: (sp, f) => !!f && isRegional(f), wish: w => (w.form ? isRegional(w.form) : !!w.sp.regional) });
+formTerm('regionalform', ['regionalforms'], 'Regional form', f => f.kind === 'regional');
+def({ key: 'exclusive', aliases: ['regionalexclusive', 'exclusives'], group: 'Form', label: 'Regional exclusive',
+  help: 'Only caught in some parts of the world (Comfey, Heracross ...)', species: sp => !!sp.regional, wish: w => !!w.sp.regional });
 for (const r of ['alolan', 'galarian', 'hisuian', 'paldean']) formTerm(r, [], r[0].toUpperCase() + r.slice(1), f => f.rt === r);
 formTerm('mega', ['megas', 'primal'], 'Mega / Primal', f => f.kind === 'mega');
 formTerm('form', ['forms', 'alternate'], 'Any non-standard form', f => f.kind !== 'base');
