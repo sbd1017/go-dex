@@ -36,7 +36,7 @@ def({ key: 'have', aliases: ['registered', 'owned', 'own', 'got', 'reg', 'caught
 def({ key: 'trade', aliases: ['fortrade', 'tradeable', 'tradable', 'offer'], group: 'Collection', label: 'For trade',
   state: true, help: 'Available for trade', entry: e => e.trade > 0, wish: () => false });
 def({ key: 'missing', aliases: ['need', 'needed', 'unregistered', 'todo'], group: 'Collection', label: 'Missing', special: 'missing',
-  help: "Counts towards completion and you don't have it (combine: shiny, missing / xxl, missing)",
+  help: "Counts towards completion and you don't have it (combine: shiny, missing / xxs, missing)",
   wish: (w, c) => w.status === 'open' && !wishSatisfied(w, c.model) });
 def({ key: 'wish', aliases: ['wishlist', 'wanted', 'want', 'wishlisted'], group: 'Collection', label: 'Wishlist',
   help: 'On the wishlist', variant: v => v.wishes.length > 0, wish: () => true });
@@ -240,12 +240,15 @@ export function compileVariants(q, mode, model) {
     else r = false;
     return a.neg ? !r : r;
   };
+  const inScope = v => (includeUntargeted || v.target || v.entries.length) && rTerms.every(t => t.atoms.some(a => atomOn(a, v)));
   return v => {
-    if (!includeUntargeted && !v.target && !v.entries.length) return false;
-    for (const t of rTerms) if (!t.atoms.some(a => atomOn(a, v))) return false;
+    if (!inScope(v)) return false;
     if (missing) {
       if (!v.target && !bgMissing) return false;
       if (bgMissing) return v.wishes.some(w => (w.background || w.bg) && !v.entries.some(e => entrySatisfies(w, e, model)));
+      // "xxs, missing" asks about the species, like the game's Pokédex: one XXS of any form or variant covers it.
+      // Other words narrow which variants count ("shiny, xxl, missing": no shiny XXL yet).
+      if (eTerms.length) return !v.sp.variants.some(x => inScope(x) && x.entries.some(entryOk));
       return !v.entries.some(entryOk);
     }
     if (have || eTerms.length) return v.entries.some(entryOk);

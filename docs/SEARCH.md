@@ -38,7 +38,7 @@ Generated from the registry in `godex/static/js/query.js` (the ? next to the sea
 `xxl, shiny` means "a shiny that is also XXL", not "any shiny and any XXL".
 
 * `shiny, missing`: shiny variants that count towards completion where you have none.
-* `xxl, missing`: variants where you have no XXL.
+* `xxl, missing`: Pokémon you have no XXL of yet (any form or variant counts, like the game's Pokédex). `shiny, xxl, missing` narrows it to shiny ones.
 * `background, missing`: backgrounds on your wishlist that nothing you own satisfies yet.
 * `!xxl`: no XXL. `!have`: not in your Pokédex.
 * `trade` means at least one is offered for trade.

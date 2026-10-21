@@ -94,9 +94,10 @@ test('trade', () => assert.deepEqual(dexes('trade'), [1, 26]));
 test('hundo / 4* / perfect are the same', () => {
   assert.deepEqual(dexes('hundo'), [26]); assert.deepEqual(dexes('4*'), [26]); assert.deepEqual(dexes('perfect, lucky'), [26]);
 });
-test('xxl, missing = variants without an XXL', () => {
-  const r = run('xxl, missing');
-  assert.ok(!r.includes('MEWTWO|n|normal|none') && r.includes('MEWTWO|s|normal|none'));
+test('xxl, missing = species without an XXL (any variant counts)', () => {
+  assert.ok(!dexes('xxl, missing').includes(150));
+  assert.ok(dexes('xxl, missing').includes(25));
+  assert.ok(run('shiny, xxl, missing').includes('MEWTWO|s|normal|none'), 'no shiny XXL yet');
 });
 test('OR with |', () => assert.deepEqual(dexes('pikachu | raichu'), [25, 26]));
 test('exact name wins: mew is not mewtwo', () => assert.deepEqual(dexes('mew'), [151]));

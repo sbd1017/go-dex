@@ -1,4 +1,4 @@
-// The species sheet (/dex/<number>): forms, every variant with what you have, special ones, wishes.
+// The species sheet (/dex/<number>): forms, every variant with what you have (special ones under the chosen variant), wishes.
 // In admin mode the selected variant gets the quick editor (in my Pokédex / for trade) and the dialogs.
 import { h, icon, pad, fmt, toast, copyText, modal } from '../dom.js';
 import { variantHas, variantLabel, formLabel, isSpecial, forTrade } from '../model.js';
@@ -121,7 +121,6 @@ function paint(app, sp) {
       extra.length ? h('details', { class: 'extra' }, h('summary', { text: `Not counted (${extra.length})` }),
         h('div', { class: 'vtiles' }, extra.map(v => tile(app, v, v === sel, mode)))) : null),
     sel ? variantPanel(app, sel, mode) : null,
-    specialList(app, sp),
     wishList(app, sp, form)));
   if (old) old.replaceWith(el); else sheet.wrap.append(el);
   el.scrollTop = scroll;
@@ -209,13 +208,6 @@ function entryRow(app, e, { showVariant = true } = {}) {
       e.note ? h('p', { class: 'note', text: e.note }) : null,
       app.admin && e.privateNote ? h('p', { class: 'note private', text: e.privateNote }) : null),
     app.admin ? h('button', { class: 'iconbtn', type: 'button', 'aria-label': 'Edit', onclick: () => entryEditor(app, { entry: e }) }, icon('edit')) : null);
-}
-
-function specialList(app, sp) {
-  const list = sp.variants.flatMap(v => v.entries.filter(e => isSpecial(e) && (app.admin || e.registered)));
-  if (!list.length) return null;
-  return h('section', { class: 'blk' }, h('h3', { text: `Special ones · ${list.length}` }),
-    h('ul', { class: 'entries' }, list.map(e => entryRow(app, e))));
 }
 
 function wishList(app, sp, form) {
