@@ -51,7 +51,11 @@ export function entryEditor(app, { entry = null, variant = null } = {}) {
   const v = entry ? entry.v : variant;
   const iv = e.iv || [null, null, null];
   const f = h('form', { class: 'dlg-body form', novalidate: true },
-    h('p', { class: 'lead' }, h('b', { text: variantLabel(v) }), h('span', { class: 'muted', text: ` · #${pad(v.sp.dex)}` })),
+    h('p', { class: 'lead' }, h('b', { text: v.sp.name }), h('span', { class: 'muted', text: ` · #${pad(v.sp.dex)}` })),
+    // Which form / variant it is. Change it to move the entry, e.g. a hundo Mewtwo you turned into Mega Y.
+    field('Which one', h('select', { name: 'variant_id' }, v.sp.forms.map(fm => h('optgroup', { label: fm.name ? formLabel(fm) : v.sp.name },
+      fm.variants.filter(x => x.target || x === v || x.entries.length).map(x => opt(x.id, variantLabel(x), v.id))))),
+      'Pick another form to move it there, like the Mega it became.'),
     h('div', { class: 'row3' },
       field('For trade', num('for_trade', e.trade, 0, 9999, 'For trade'))),
     h('div', { class: 'row3' },
@@ -86,7 +90,7 @@ export function entryEditor(app, { entry = null, variant = null } = {}) {
     ev.preventDefault();
     const d = new FormData(f);
     const body = {
-      variant_id: v.id, registered: true, for_trade: intOrNull(d.get('for_trade')) ?? 0,
+      variant_id: d.get('variant_id') || v.id, registered: true, for_trade: intOrNull(d.get('for_trade')) ?? 0,
       owned: intOrNull(d.get('for_trade')) ?? 0,          // only kept so that what is offered is also had
       size: d.get('size'), gender: d.get('gender'), lucky: !!d.get('lucky'),
       iv_atk: intOrNull(d.get('iv_atk')), iv_def: intOrNull(d.get('iv_def')), iv_sta: intOrNull(d.get('iv_sta')),
