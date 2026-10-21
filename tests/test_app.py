@@ -275,3 +275,16 @@ def test_login_keeps_destination(tmp_path):
     assert 'value="/admin"' in c.get("/dex/login?next=https://evil.example").text
     r = c.post("/dex/login", data={"password": "correct horse battery", "next": "/admin/wishlist"}, follow_redirects=False)
     assert r.headers["location"] == "/dex/admin/wishlist"
+
+
+def test_species_records(client):
+    sp = lambda dex: next(s for s in client.get("/dex/api/dataset").json()["species"] if s["dex"] == dex)  # noqa: E731
+    assert sp(151)["sizes"] == 0 and sp(151)["lucky"] == 0             # catalog: Mew has no size records, can't trade
+    assert sp(25)["sizes"] == 1 and sp(25)["lucky"] == 1
+    assert client.post("/dex/api/admin/species/record", json={"dex": 25, "record": "sizes", "value": 0}).json()["ok"]
+    assert sp(25)["sizes"] == 0
+    exported = client.get("/dex/api/admin/export.json").json()
+    assert exported["species_records"]["25"] == {"sizes": 0}
+    client.post("/dex/api/admin/undo", json={})
+    assert sp(25)["sizes"] == 1
+    assert client.post("/dex/api/admin/species/record", json={"dex": 25, "record": "shiny", "value": 0}).status_code == 400

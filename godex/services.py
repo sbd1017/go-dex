@@ -420,6 +420,24 @@ def set_target(conn, batch, variant_id: str, target):
            f"{describe_variant(conn, variant_id)}: counts towards completion = {'auto' if value is None else bool(value)}")
 
 
+SPECIES_RECORDS = {"sizes": "can be XXS / XXL", "lucky": "can be lucky"}
+
+
+def set_species_record(conn, batch, dex, record_name: str, value):
+    """Whether the game keeps a record (sizes, lucky) for a species. None/'auto' follows the catalog."""
+    if record_name not in SPECIES_RECORDS:
+        raise Invalid("Record must be sizes or lucky")
+    col = f"{record_name}_override"
+    dex = _int(dex, 1, 9999, "dex", nullable=False)
+    sp = _row(conn, f"SELECT dex, name, {col} FROM species WHERE dex = ?", (dex,))
+    if not sp:
+        raise Invalid("Unknown Pokédex number")
+    value = None if value in (None, "", "auto") else _bool(value)
+    conn.execute(f"UPDATE species SET {col} = ? WHERE dex = ?", (value, dex))
+    record(conn, batch, "update", "species", str(dex), {"dex": dex, col: sp[col]}, {"dex": dex, col: value},
+           f"{sp['name']}: {SPECIES_RECORDS[record_name]} = {'auto' if value is None else bool(value)}")
+
+
 def save_background(conn, batch, name: str, kind: str, bg_id: str | None = None) -> dict:
     name = _text(name, 80, "name")
     if not name:
@@ -495,6 +513,11 @@ def undo(conn, batch: str | None = None) -> dict:
         elif r["entity"] == "variants":
             conn.execute("UPDATE variants SET target_override = ? WHERE id = ?",
                          (before["target_override"] if before else None, r["entity_id"]))
+        elif r["entity"] == "species":
+            for col in ("sizes_override", "lucky_override"):
+                if col in (json.loads(r["after"]) if r["after"] else {}):
+                    conn.execute(f"UPDATE species SET {col} = ? WHERE dex = ?",
+                                 ((before or {}).get(col), int(r["entity_id"])))
         elif r["entity"] == "backgrounds":
             if before:
                 conn.execute("UPDATE backgrounds SET name = ?, kind = ?, custom = ? WHERE id = ?",
@@ -532,6 +555,9 @@ def export(conn) -> dict:
         "wishes": [{k: v for k, v in w.items() if k != "id"} for w in wishes],
         "variant_targets": {r[0]: r[1] for r in conn.execute(
             "SELECT id, target_override FROM variants WHERE target_override IS NOT NULL")},
+        "species_records": {str(r[0]): {k: r[k] for k in ("sizes", "lucky") if r[k] is not None} for r in conn.execute(
+            "SELECT dex, sizes_override AS sizes, lucky_override AS lucky FROM species "
+            "WHERE sizes_override IS NOT NULL OR lucky_override IS NOT NULL")},
         "custom_backgrounds": [dict(r) for r in conn.execute(
             "SELECT id, name, kind, year FROM backgrounds WHERE custom = 1")],
         "tags": [dict(r) for r in conn.execute("SELECT slug, label, description FROM tags ORDER BY slug")],
@@ -574,6 +600,8 @@ def import_collection(conn, batch, data: dict, mode: str) -> dict:
             raise Invalid(f"'{key}' must be a list")
     if data.get("variant_targets") is not None and not isinstance(data["variant_targets"], dict):
         raise Invalid("'variant_targets' must be an object")
+    if data.get("species_records") is not None and not isinstance(data["species_records"], dict):
+        raise Invalid("'species_records' must be an object")
     report = {"entries": 0, "merged": 0, "wishes": 0, "duplicates": 0, "skipped": []}
     bad = (Invalid, ValueError, KeyError, TypeError, AttributeError, sqlite3.IntegrityError)
     for t in data.get("tags") or []:
@@ -630,6 +658,12 @@ def import_collection(conn, batch, data: dict, mode: str) -> dict:
             set_target(conn, batch, vid, target)
         except bad:
             report["skipped"].append(f"target {vid}")
+    for dex, recs in (data.get("species_records") or {}).items():
+        try:
+            for name, value in recs.items():
+                set_species_record(conn, batch, dex, name, value)
+        except bad:
+            report["skipped"].append(f"records for #{dex}")
     if isinstance(data.get("settings"), dict):
         try:
             save_settings(conn, batch, data["settings"])

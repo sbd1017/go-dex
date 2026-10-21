@@ -340,6 +340,12 @@ def create_app(cfg: config.Config | None = None) -> FastAPI:
         return await write(lambda conn, batch: services.set_target(conn, batch, str(data.get("variant_id")),
                                                              data.get("target")))
 
+    @app.post(BASE + "/api/admin/species/record")
+    async def species_record(request: Request):
+        data = await body(request)
+        return await write(lambda conn, batch: services.set_species_record(
+            conn, batch, data.get("dex"), str(data.get("record")), data.get("value")))
+
     @app.post(BASE + "/api/admin/wishes")
     async def wish_create(request: Request):
         data = await body(request)

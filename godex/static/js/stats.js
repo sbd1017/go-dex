@@ -1,7 +1,7 @@
 // Collection statistics, all derived from the same model the search uses. Pure (no DOM).
 // Every metric carries the query that shows it in the Pokédex, so tiles can link straight to the list.
 
-import { inMode, isPerfect, variantHas, wishSatisfied } from './model.js';
+import { canHave, inMode, isPerfect, variantHas, wishSatisfied } from './model.js';
 
 export const REGION_NAMES = { 1: 'Kanto', 2: 'Johto', 3: 'Hoenn', 4: 'Sinnoh', 5: 'Unova', 6: 'Kalos', 7: 'Alola', 8: 'Galar', 9: 'Paldea' };
 
@@ -15,8 +15,10 @@ export function computeStats(m, mode) {
     const pool = m.species.filter(sp => sp.variants.some(v => v.target && pick(v)));
     return { id, label, q, have: pool.filter(have).length, total: pool.length };
   };
-  const entryMetric = (id, label, q, test) =>
-    ({ id, label, q, have: tracked.filter(sp => entryIn(sp, test)).length, total: tracked.length });
+  const entryMetric = (id, label, q, test, rec) => {
+    const pool = rec ? tracked.filter(sp => canHave(sp, rec)) : tracked;   // Mew can't be XXS, Mew can't be lucky
+    return { id, label, q, have: pool.filter(sp => entryIn(sp, test)).length, total: pool.length };
+  };
   const formMetric = (id, label, q, kind) => {
     const pool = m.forms.filter(f => f.kind === kind && f.variants.some(v => v.target));
     return { id, label, q, have: pool.filter(f => f.variants.some(has)).length, total: pool.length };
@@ -34,10 +36,10 @@ export function computeStats(m, mode) {
     speciesMetric('shiny', 'Shiny', 'shiny', v => v.shiny && nonMega(v)),
     speciesMetric('shadow', 'Shadow', 'shadow', v => v.align === 'shadow'),
     speciesMetric('purified', 'Purified', 'purified', v => v.align === 'purified'),
-    entryMetric('lucky', 'Lucky', 'lucky', e => e.lucky),
+    entryMetric('lucky', 'Lucky', 'lucky', e => e.lucky, 'lucky'),
     entryMetric('perfect', 'Perfect', 'perfect', isPerfect),
-    entryMetric('xxl', 'XXL', 'xxl', e => e.size === 'xxl'),
-    entryMetric('xxs', 'XXS', 'xxs', e => e.size === 'xxs'),
+    entryMetric('xxl', 'XXL', 'xxl', e => e.size === 'xxl', 'sizes'),
+    entryMetric('xxs', 'XXS', 'xxs', e => e.size === 'xxs', 'sizes'),
     formMetric('costume', 'Costumes', 'costume', 'costume'),
     formMetric('regional', 'Regional forms', 'regional', 'regional'),
     formMetric('alternate', 'Other forms', 'form, !costume, !regional, !mega', 'alternate'),

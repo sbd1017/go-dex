@@ -16,7 +16,7 @@
 //   wish(w, ctx)       how the same word applies to a wish
 // Adding a search word = adding one object here.
 
-import { norm, isPerfect, variantHas, inMode, wishSatisfied, entrySatisfies } from './model.js';
+import { norm, isPerfect, variantHas, inMode, wishSatisfied, entrySatisfies, canHave } from './model.js';
 
 const REGIONS = ['kanto', 'johto', 'hoenn', 'sinnoh', 'unova', 'kalos', 'alola', 'galar', 'hisui', 'paldea'];
 const TYPES = ['normal', 'fire', 'water', 'grass', 'electric', 'ice', 'fighting', 'poison', 'ground', 'flying',
@@ -60,9 +60,9 @@ def({ key: 'max', aliases: ['maxbattle'], group: 'Variant', label: 'Dynamax or G
 
 // ---- per-Pokémon details (things that differ between individuals) ---------------
 for (const [k, label] of Object.entries(SIZE)) {
-  def({ key: k, group: 'Details', label, entry: e => e.size === k, wish: w => w.size === k });
+  def({ key: k, group: 'Details', label, record: 'sizes', entry: e => e.size === k, wish: w => w.size === k });
 }
-def({ key: 'lucky', aliases: ['luckies'], group: 'Details', label: 'Lucky', entry: e => e.lucky, wish: w => w.lucky === 1 });
+def({ key: 'lucky', aliases: ['luckies'], group: 'Details', label: 'Lucky', record: 'lucky', entry: e => e.lucky, wish: w => w.lucky === 1 });
 def({ key: 'perfect', aliases: ['hundo', '4*', '15-15-15', '151515', 'hundos'], group: 'Details', label: 'Perfect (15/15/15)',
   entry: isPerfect, wish: w => w.minIv.every(x => x === 15) });
 def({ key: 'background', aliases: ['bg', 'backgrounds'], group: 'Details', label: 'Background', help: 'Any location or special background',
@@ -240,18 +240,26 @@ export function compileVariants(q, mode, model) {
     else r = false;
     return a.neg ? !r : r;
   };
+  // You never keep a Mega: its hundo, lucky or XXL is the Pokémon it evolves from (same shiny-ness). So with detail
+  // words, a Mega variant also looks at the entries of its species' other variants: "mega, hundo" = hundos that can Mega.
+  const details = eTerms.some(t => t.atoms.every(a => !a.def.state));       // xxl, hundo ... (not plain "have")
+  const entriesOf = v => (details && q.formLevel && v.form.kind === 'mega'
+    ? v.entries.concat(v.sp.variants.filter(x => x.form.kind !== 'mega' && x.shiny === v.shiny).flatMap(x => x.entries))
+    : v.entries);
   const inScope = v => (includeUntargeted || v.target || v.entries.length) && rTerms.every(t => t.atoms.some(a => atomOn(a, v)));
   return v => {
     if (!inScope(v)) return false;
     if (missing) {
       if (!v.target && !bgMissing) return false;
       if (bgMissing) return v.wishes.some(w => (w.background || w.bg) && !v.entries.some(e => entrySatisfies(w, e, model)));
-      // "xxs, missing" asks about the species, like the game's Pokédex: one XXS of any form or variant covers it.
-      // Other words narrow which variants count ("shiny, xxl, missing": no shiny XXL yet).
-      if (eTerms.length) return !v.sp.variants.some(x => inScope(x) && x.entries.some(entryOk));
-      return !v.entries.some(entryOk);
+      // A record the game doesn't keep for this species (Mew has no XXS) is never missing.
+      if (eTerms.some(t => t.atoms.every(a => a.def.record && !canHave(v.sp, a.def.record)))) return false;
+      // Like the game's Pokédex: any variant that fits the other words covers the Pokémon. A shiny Shadow or a
+      // shiny costume means "shiny, missing" no longer lists it; for form searches (costume, regional ...) each form counts.
+      const pool = q.formLevel ? v.form.variants : v.sp.variants;
+      return !pool.some(x => inScope(x) && entriesOf(x).some(entryOk));
     }
-    if (have || eTerms.length) return v.entries.some(entryOk);
+    if (have || eTerms.length) return entriesOf(v).some(entryOk);
     return true;
   };
 }

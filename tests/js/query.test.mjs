@@ -15,7 +15,7 @@ function dataset() {
     sp(25, 'Pikachu', 1, 'kanto', ['electric'], { family: 'PIKACHU' }),
     sp(26, 'Raichu', 1, 'kanto', ['electric'], { family: 'PIKACHU' }),
     sp(150, 'Mewtwo', 1, 'kanto', ['psychic'], { class: 'legendary' }),
-    sp(151, 'Mew', 1, 'kanto', ['psychic'], { class: 'mythical' }),
+    sp(151, 'Mew', 1, 'kanto', ['psychic'], { class: 'mythical', sizes: 0, lucky: 0 }),   // no size records, untradable
     sp(484, 'Palkia', 4, 'sinnoh', ['water', 'dragon'], { class: 'legendary' }),
   ];
   const forms = [
@@ -25,6 +25,7 @@ function dataset() {
     form('RAICHU', 26, 'base', '', { types: ['electric'] }),
     form('RAICHU_ALOLA', 26, 'regional', 'Alolan', { types: ['electric', 'psychic'], rt: 'alolan' }),
     form('MEWTWO', 150, 'base', '', { types: ['psychic'] }),
+    form('MEWTWO_MEGA_X', 150, 'mega', 'Mega X', { types: ['psychic', 'fighting'] }),
     form('MEW', 151, 'base', '', { types: ['psychic'] }),
     form('PALKIA', 484, 'base', '', { types: ['water', 'dragon'] }),
     form('PALKIA_ORIGIN', 484, 'alternate', 'Origin Forme', { types: ['water', 'dragon'] }),
@@ -32,9 +33,9 @@ function dataset() {
   const variants = [];
   forms.forEach((f, i) => {
     variants.push([`${f.id}|n|normal|none`, i, 0, 0, 0, 1], [`${f.id}|s|normal|none`, i, 1, 0, 0, 1]);
-    if (f.kind !== 'costume') variants.push([`${f.id}|n|shadow|none`, i, 0, 1, 0, 1], [`${f.id}|s|shadow|none`, i, 1, 1, 0, 1]);
+    if (f.kind !== 'costume' && f.kind !== 'mega') variants.push([`${f.id}|n|shadow|none`, i, 0, 1, 0, 1], [`${f.id}|s|shadow|none`, i, 1, 1, 0, 1]);
   });
-  variants.push(['MEW|s|purified|none', 6, 1, 2, 0, 0]);                 // does not count towards completion
+  variants.push(['MEW|s|purified|none', forms.findIndex(f => f.id === 'MEW'), 1, 2, 0, 0]);                 // does not count towards completion
   const entries = [
     { id: 1, v: 'BULBASAUR|n|normal|none', r: 1, o: 2, t: 1 },
     { id: 2, v: 'PIKACHU|s|normal|none', r: 1, o: 1 },
@@ -73,9 +74,12 @@ test('shiny, missing excludes owned shinies', () => {
   assert.ok(r.includes('MEW|s|normal|none'));
   assert.ok(!r.includes('MEW|s|purified|none'), 'non-target variants never count as missing');
 });
-test('registered mode: transferred Pikachu is registered, not owned', () => {
-  assert.ok(run('missing', 'owned').includes('PIKACHU|n|normal|none'));
-  assert.ok(!run('missing', 'registered').includes('PIKACHU|n|normal|none'));
+test('missing works per Pokémon: any shiny covers the shiny entry, like the game', () => {
+  const r = run('shiny, missing', 'registered');
+  assert.ok(!r.some(id => id.startsWith('PIKACHU')), 'a shiny Pikachu covers shiny Shadow and shiny costume too');
+  assert.ok(r.includes('MEWTWO|s|normal|none') && r.includes('MEWTWO|s|shadow|none'));
+  assert.ok(run('costume, shiny, missing', 'registered').includes('PIKACHU_VS_2019|s|normal|none'), 'costumes count one by one');
+  assert.deepEqual(dexes('missing'), [151], 'only Mew has nothing registered at all');
 });
 test('shadow, missing', () => assert.ok(run('shadow, missing').every(id => id.includes('|shadow|'))));
 test('xxl, shiny -> shiny XXL owned', () => assert.deepEqual(run('xxl, shiny'), ['PALKIA|s|normal|none']));
@@ -98,6 +102,15 @@ test('xxl, missing = species without an XXL (any variant counts)', () => {
   assert.ok(!dexes('xxl, missing').includes(150));
   assert.ok(dexes('xxl, missing').includes(25));
   assert.ok(run('shiny, xxl, missing').includes('MEWTWO|s|normal|none'), 'no shiny XXL yet');
+});
+test('a record the game never keeps is never missing', () => {
+  assert.ok(!dexes('xxs, missing').includes(151) && dexes('xxs, missing').includes(1));
+  assert.ok(!dexes('lucky, missing').includes(151));
+  assert.ok(dexes('shiny, missing').includes(151), 'only those records are skipped');
+});
+test('mega, xxl: the XXL is the Pokémon that Mega Evolves', () => {
+  assert.deepEqual(run('mega, xxl'), ['MEWTWO_MEGA_X|n|normal|none']);
+  assert.deepEqual(run('mega, have'), [], 'no Mega registered yet');
 });
 test('OR with |', () => assert.deepEqual(dexes('pikachu | raichu'), [25, 26]));
 test('exact name wins: mew is not mewtwo', () => assert.deepEqual(dexes('mew'), [151]));

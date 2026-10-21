@@ -37,8 +37,9 @@ Generated from the registry in `godex/static/js/query.js` (the ? next to the sea
 "Have" means it is in your Pokédex. Detail words are about one Pokémon, so
 `xxl, shiny` means "a shiny that is also XXL", not "any shiny and any XXL".
 
-* `shiny, missing`: shiny variants that count towards completion where you have none.
+* `shiny, missing`: Pokémon you have no shiny of yet, like the game's shiny Pokédex: a shiny Shadow, costume or regional form covers it. Form words count each form on its own: `costume, shiny, missing` lists every costume you have no shiny of.
 * `xxl, missing`: Pokémon you have no XXL of yet (any form or variant counts, like the game's Pokédex). `shiny, xxl, missing` narrows it to shiny ones.
+* `mega, hundo`: Megas whose Pokémon you have a hundo of (you never keep a Mega, so its hundo, lucky or XXL is the Pokémon it evolves from).
 * `background, missing`: backgrounds on your wishlist that nothing you own satisfies yet.
 * `!xxl`: no XXL. `!have`: not in your Pokédex.
 * `trade` means at least one is offered for trade.

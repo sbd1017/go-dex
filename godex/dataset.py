@@ -32,6 +32,8 @@ def build(conn, sprites, admin: bool) -> dict:
             "family": s["family"], "class": s["class"], "types": [t for t in (s["type1"], s["type2"]) if t],
             "gd": s["gender_diff"], "rel": s["released"], "shiny": s["shiny"], "shadow": s["shadow"],
             "gmax": s["gmax"], "dmax": s["dynamax"],
+            "sizes": s["sizes"] if s["sizes_override"] is None else s["sizes_override"],
+            "lucky": s["lucky"] if s["lucky_override"] is None else s["lucky_override"],
         })
     forms, form_index = [], {}
     base_image = {r[0]: r[1] for r in conn.execute(

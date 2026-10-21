@@ -28,6 +28,8 @@ function entryFrom(raw) {
   };
 }
 
+/** Does the game keep this record for the species? rec: 'sizes' (XXS/XXL) or 'lucky'. */
+export const canHave = (sp, rec) => sp[rec] !== 0 && sp[rec] !== false;
 export const isPerfect = e => !!e.iv && e.iv.every(x => x === 15);
 export const isSpecial = e => !!(e.gender || e.size || e.lucky || e.iv || e.bg || e.moves || e.cp || e.nickname);
 

@@ -164,6 +164,8 @@ def build(src: dict, ov: dict) -> dict:
             "released": dex in released, "shiny": dex in shiny_dex,
             "shadow": bool(base_ps.get("shadow")), "gmax": bool(p.get("hasGigantamaxEvolution")),
             "dynamax": False,
+            "sizes": True,                               # XXS / XXL records (overrides turn it off, e.g. Mew)
+            "lucky": bool(base_ps.get("isTradable")) if base_ps else True,  # only tradable ones can be lucky
         }
         sp.update(ov["species"].get(str(dex), {}))
         species.append(sp)

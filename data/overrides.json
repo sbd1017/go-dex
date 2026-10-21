@@ -32,8 +32,10 @@
   "untargeted_form_suffixes": [
     "_S"
   ],
-  "_species": "Per-species flag overrides keyed by National Dex number: released, shiny, shadow, gmax, dynamax.",
-  "species": {},
+  "_species": "Per-species flag overrides keyed by National Dex number: released, shiny, shadow, gmax, dynamax, sizes (XXS/XXL records), lucky.",
+  "species": {
+    "151": {"sizes": false}
+  },
   "_forms": "Per-form flag overrides keyed by form id: released, shiny, shadow, name, kind.",
   "forms": {},
   "background_tokens": {

@@ -1,7 +1,7 @@
 // The species sheet (/dex/<number>): forms, every variant with what you have (special ones under the chosen variant), wishes.
 // In admin mode the selected variant gets the quick editor (in my Pokédex / for trade) and the dialogs.
 import { h, icon, pad, fmt, toast, copyText, modal } from '../dom.js';
-import { variantHas, variantLabel, formLabel, isSpecial, forTrade } from '../model.js';
+import { variantHas, variantLabel, formLabel, isSpecial, forTrade, canHave } from '../model.js';
 import { searchFromQuery } from '../query.js';
 import { sprite, typeChips, entryChips, entryLine, wishCard, pips } from '../components.js';
 import { entryEditor, wishEditor } from '../editors.js';
@@ -121,7 +121,8 @@ function paint(app, sp) {
       extra.length ? h('details', { class: 'extra' }, h('summary', { text: `Not counted (${extra.length})` }),
         h('div', { class: 'vtiles' }, extra.map(v => tile(app, v, v === sel, mode)))) : null),
     sel ? variantPanel(app, sel, mode) : null,
-    wishList(app, sp, form)));
+    wishList(app, sp, form),
+    app.admin ? recordSwitches(app, sp) : null));
   if (old) old.replaceWith(el); else sheet.wrap.append(el);
   el.scrollTop = scroll;
 }
@@ -208,6 +209,20 @@ function entryRow(app, e, { showVariant = true } = {}) {
       e.note ? h('p', { class: 'note', text: e.note }) : null,
       app.admin && e.privateNote ? h('p', { class: 'note private', text: e.privateNote }) : null),
     app.admin ? h('button', { class: 'iconbtn', type: 'button', 'aria-label': 'Edit', onclick: () => entryEditor(app, { entry: e }) }, icon('edit')) : null);
+}
+
+/** What the game can record for this species. Off = never counted as missing or in the totals. */
+function recordSwitches(app, sp) {
+  const sw = (rec, label) => h('label', { class: 'switch sm' },
+    h('input', { type: 'checkbox', checked: canHave(sp, rec), onchange: async e => {
+      try {
+        await app.saved(await app.post('species/record', { dex: sp.dex, record: rec, value: e.target.checked ? 1 : 0 }),
+          `${sp.name} ${e.target.checked ? 'can' : "can't"} ${rec === 'sizes' ? 'be XXS / XXL' : 'be lucky'}`);
+      } catch { /* toast shown */ }
+    } }), h('span', { class: 'sw' }), h('span', { text: label }));
+  return h('section', { class: 'blk' }, h('h3', { text: 'In the game' }),
+    h('div', { class: 'ed-actions' }, sw('sizes', 'Can be XXS / XXL'), sw('lucky', 'Can be lucky')),
+    h('p', { class: 'hint', text: 'Turn off what the game never records for this Pokémon, so "missing" searches and totals skip it.' }));
 }
 
 function wishList(app, sp, form) {

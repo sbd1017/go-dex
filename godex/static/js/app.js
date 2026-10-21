@@ -58,7 +58,7 @@ export const app = {
     history[push ? 'pushState' : 'replaceState'](null, '', this.root(path) + searchFromQuery(text, opts));
     this.route = this.parseRoute();
     this.lastQuery[r.view] = text;
-    this.renderMain();
+    this.renderMain(r);                 // same view: update in place, so the search box keeps focus
   },
 
   setOption(key, value) {
