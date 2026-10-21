@@ -26,6 +26,7 @@ function dataset() {
     form('RAICHU_ALOLA', 26, 'regional', 'Alolan', { types: ['electric', 'psychic'], rt: 'alolan' }),
     form('MEWTWO', 150, 'base', '', { types: ['psychic'] }),
     form('MEWTWO_MEGA_X', 150, 'mega', 'Mega X', { types: ['psychic', 'fighting'] }),
+    form('MEWTWO_MEGA_Y', 150, 'mega', 'Mega Y', { types: ['psychic'] }),
     form('MEW', 151, 'base', '', { types: ['psychic'] }),
     form('PALKIA', 484, 'base', '', { types: ['water', 'dragon'] }),
     form('PALKIA_ORIGIN', 484, 'alternate', 'Origin Forme', { types: ['water', 'dragon'] }),
@@ -43,6 +44,7 @@ function dataset() {
     { id: 4, v: 'MEWTWO|n|normal|none', r: 1, o: 1, sz: 'xxl' },
     { id: 5, v: 'PALKIA|s|normal|none', r: 1, o: 1, sz: 'xxl', bg: 'LC_X', tags: ['pvp'] },
     { id: 6, v: 'RAICHU_ALOLA|n|normal|none', r: 1, o: 3, t: 3, l: 1, ia: 15, id_: 15, is: 15 },
+    { id: 7, v: 'MEWTWO_MEGA_Y|n|normal|none', r: 1, o: 0, ia: 15, id_: 15, is: 15 },     // the hundo went Mega Y
   ];
   const wishes = [
     { id: 1, dex: 25, form_id: 'PIKACHU_VS_2019', shiny: 1, priority: 'high', status: 'open', tags: [] },
@@ -109,8 +111,9 @@ test('a record the game never keeps is never missing', () => {
   assert.ok(dexes('shiny, missing').includes(151), 'only those records are skipped');
 });
 test('mega, xxl: the XXL is the Pokémon that Mega Evolves', () => {
-  assert.deepEqual(run('mega, xxl'), ['MEWTWO_MEGA_X|n|normal|none']);
-  assert.deepEqual(run('mega, have'), [], 'no Mega registered yet');
+  assert.deepEqual(run('mega, xxl', 'registered'), ['MEWTWO_MEGA_X|n|normal|none', 'MEWTWO_MEGA_Y|n|normal|none']);
+  assert.deepEqual(run('mega, hundo', 'registered'), ['MEWTWO_MEGA_Y|n|normal|none'], 'recorded on Mega Y: only Mega Y');
+  assert.deepEqual(run('mega, have', 'registered'), ['MEWTWO_MEGA_Y|n|normal|none']);
 });
 test('OR with |', () => assert.deepEqual(dexes('pikachu | raichu'), [25, 26]));
 test('exact name wins: mew is not mewtwo', () => assert.deepEqual(dexes('mew'), [151]));

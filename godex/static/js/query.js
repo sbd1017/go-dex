@@ -242,10 +242,14 @@ export function compileVariants(q, mode, model) {
   };
   // You never keep a Mega: its hundo, lucky or XXL is the Pokémon it evolves from (same shiny-ness). So with detail
   // words, a Mega variant also looks at the entries of its species' other variants: "mega, hundo" = hundos that can Mega.
+  // Recording one on a Mega itself (a hundo on Mega Y) is more exact and wins: then only that Mega matches.
   const details = eTerms.some(t => t.atoms.every(a => !a.def.state));       // xxl, hundo ... (not plain "have")
-  const entriesOf = v => (details && q.formLevel && v.form.kind === 'mega'
-    ? v.entries.concat(v.sp.variants.filter(x => x.form.kind !== 'mega' && x.shiny === v.shiny).flatMap(x => x.entries))
-    : v.entries);
+  const megaOf = v => v.sp.variants.filter(x => x.form.kind === 'mega' && x.shiny === v.shiny);
+  const entriesOf = v => {
+    if (!(details && q.formLevel && v.form.kind === 'mega')) return v.entries;
+    if (megaOf(v).some(x => x.entries.some(entryOk))) return v.entries;
+    return v.entries.concat(v.sp.variants.filter(x => x.form.kind !== 'mega' && x.shiny === v.shiny).flatMap(x => x.entries));
+  };
   const inScope = v => (includeUntargeted || v.target || v.entries.length) && rTerms.every(t => t.atoms.some(a => atomOn(a, v)));
   return v => {
     if (!inScope(v)) return false;
