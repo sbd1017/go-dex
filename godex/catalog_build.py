@@ -270,6 +270,21 @@ def build(src: dict, ov: dict) -> dict:
             } | ov["forms"].get(fid, {}))
             by_code[ccode] = forms[-1]
             sort += 1
+        # Forms newer than the game-data mirrors, which can lag by months. data/overrides.json "new_forms" names them
+        # by GO icon (pm4.fGOGGLES_2026); a form on Leek Duck's shiny list is marked shiny.
+        for icon, extra in ov.get("new_forms", {}).items():
+            m = re.fullmatch(rf"pm{dex}\.f(.+)", icon)
+            if not m or m[1].upper() in by_code:
+                continue
+            fcode = m[1].upper()
+            fid = f"{code}_{fcode}"
+            forms.append({
+                "id": fid, "dex": dex, "code": fcode, "name": titleize(fcode, ov["form_name_tokens"] | MONTHS),
+                "kind": "costume", "region_tag": "", "types": sp["types"], "sort": 500 + sort, "image": icon,
+                "released": sp["released"], "shiny": is_shiny(icon), "shadow": False,
+            } | extra | ov["forms"].get(fid, {}))
+            by_code[fcode] = forms[-1]
+            sort += 1
         mine = forms[species_forms_start:]
         seen_names = {}
         for f in mine:                                 # two different forms must not look the same in a list
