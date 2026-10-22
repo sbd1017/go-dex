@@ -66,6 +66,7 @@ location ^~ @BASE_PATH@/admin {
     proxy_pass http://127.0.0.1:@PORT@;
     include snippets/godex-proxy.conf;
     include @IDENTITY_INCLUDE@;
+    include @PROXY_KEY_INCLUDE@;
     add_header Strict-Transport-Security "max-age=31536000" always;
     add_header X-Robots-Tag "noindex, nofollow, noarchive" always;
 }
@@ -78,6 +79,7 @@ location ^~ @BASE_PATH@/api/admin/ {
     proxy_pass http://127.0.0.1:@PORT@;
     include snippets/godex-proxy.conf;
     include @IDENTITY_INCLUDE@;
+    include @PROXY_KEY_INCLUDE@;
     add_header Strict-Transport-Security "max-age=31536000" always;
     add_header X-Robots-Tag "noindex, nofollow, noarchive" always;
 }

@@ -10,6 +10,11 @@ login service), godex trusts three headers from a loopback peer only: `X-Site-Us
 (32+ url-safe characters, used as the CSRF token) and `X-Site-Expires` (unix time). The proxy must overwrite
 them after authenticating, and must clear them on public paths. See `godex/site_auth.py`.
 
+Being on loopback is not proof that the proxy sent a request (any process on the machine can connect there), so
+site mode also requires the proxy's secret `X-Site-Proxy-Key`. `scripts/deploy.sh` creates the key as
+`/etc/<SERVICE>/site-proxy-key` and the matching nginx snippet (`PROXY_KEY_INCLUDE`, both root 0600); the service gets the
+key through systemd `LoadCredential`, and refuses to start without it. To rotate, delete both files and deploy again.
+
 1. `cp deploy.env.example deploy.env` and fill it in.
 2. `scripts/deploy.sh --install --sprites` creates the system user, the private `var/` directory, the venv, the
    systemd units (service + daily backup timer, keeps 30), and installs the nginx snippets.

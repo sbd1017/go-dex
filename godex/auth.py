@@ -1,7 +1,9 @@
 """Who may edit. The public pages never need any of this; only /admin and /api/admin do.
 
 DEX_AUTH=site      Behind a reverse proxy that already authenticated the owner (e.g. nginx auth_request) and sets
-                   X-Site-User / X-Site-CSRF / X-Site-Expires. Trusted only from a loopback peer (see site_auth.py).
+                   X-Site-User / X-Site-CSRF / X-Site-Expires. Trusted only from a loopback peer, and only with the
+                   proxy's secret X-Site-Proxy-Key (systemd LoadCredential site-proxy-key, or SITE_PROXY_KEY_FILE),
+                   so other processes on the same machine can't pose as the owner. Refuses to start without it.
 DEX_AUTH=password  A single admin password. Only its scrypt hash is stored (var/admin.json, or the env var
                    DEX_ADMIN_PASSWORD_HASH). Sessions are signed, expiring cookies carrying their own CSRF token.
 DEX_AUTH=none      No login at all: anyone can edit. For local development, or a public demo that resets itself.
@@ -59,6 +61,8 @@ class Auth:
         self.cfg = cfg
         self.mode = cfg.auth
         self._failures: dict[str, list[float]] = {}
+        if self.mode == "site" and site_auth.proxy_key() is None:
+            raise SystemExit("DEX_AUTH=site needs the site proxy key (LoadCredential site-proxy-key or SITE_PROXY_KEY_FILE)")
         if self.mode == "password":
             self.key = _secret(cfg.data_dir)
 

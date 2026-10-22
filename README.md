@@ -11,6 +11,11 @@ update it while you play.
 Not affiliated with Niantic, Scopely, Nintendo, The Pokémon Company or GAME FREAK. No Pokémon images are
 included (see [Images](#images)).
 
+**Try it:** [mubar.uk/dex](https://mubar.uk/dex/) is a public demo with a made-up collection (a level 72
+trainer who plays most events). Anyone can edit it at `/dex/admin`, and it resets every night.
+
+![The Pokédex grid](docs/screenshots/grid.webp)
+
 ## What it does
 
 * **Pokédex** grid that feels like the in-game one: silhouettes for what you don't have, type-tinted cards
@@ -39,6 +44,19 @@ included (see [Images](#images)).
   export, a repeatable JSON import with a dry run ([docs/IMPORT.md](docs/IMPORT.md)), and undo for every change.
 * **Phone friendly**: designed for the iPhone first, a floating region picker, Add to Home Screen, and link
   previews when you share a page in a chat.
+
+## Screenshots
+
+| | |
+|---|---|
+| ![Search: shiny, missing](docs/screenshots/search.webp) | ![A Pokémon's page with every form and variant](docs/screenshots/pokemon.webp) |
+| `shiny, missing`: Pokémon with no shiny yet | Each Pokémon's page: forms, variants, what you have |
+| ![Copy for Pokémon GO](docs/screenshots/gosearch.webp) | ![Wishlist](docs/screenshots/wishlist.webp) |
+| Copy any result as a Pokémon GO search string | The wishlist, with "have one" when something matches |
+| ![Stats](docs/screenshots/stats.webp) | <img src="docs/screenshots/phone.webp" alt="On a phone" width="260"> |
+| Stats: every number opens the matching search | On a phone |
+
+The screenshots are from the demo. The images in them are not part of this repository (see [Images](#images)).
 
 ## Quick start
 

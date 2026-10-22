@@ -162,10 +162,14 @@ def test_password_mode(tmp_path):
     assert bad_origin.status_code == 403
 
 
-def test_site_mode_trusts_only_loopback(tmp_path):
+def test_site_mode_trusts_only_loopback(tmp_path, monkeypatch):
+    key = "k" * 64
+    (tmp_path / "proxy-key").write_text(key + "\n")
+    monkeypatch.setenv("SITE_PROXY_KEY_FILE", str(tmp_path / "proxy-key"))
     cfg = make_cfg(tmp_path, DEX_AUTH="site")
     app = create_app(cfg)
-    hdrs = {"x-site-user": "owner", "x-site-csrf": "c" * 40, "x-site-expires": str(int(time.time()) + 600)}
+    hdrs = {"x-site-user": "owner", "x-site-csrf": "c" * 40, "x-site-expires": str(int(time.time()) + 600),
+            "x-site-proxy-key": key}
     remote = TestClient(app)                                  # TestClient's peer is "testclient", not loopback
     assert remote.get("/dex/api/admin/dataset", headers=hdrs).status_code == 401
     async def from_loopback(scope, receive, send):
@@ -177,6 +181,17 @@ def test_site_mode_trusts_only_loopback(tmp_path):
     assert local.get("/dex/api/admin/dataset", headers=expired).status_code == 401
     ok = local.post("/dex/api/admin/quick", json={"variant_id": "MEW|n|normal|none", "owned": 1}, headers=hdrs | {"x-csrf-token": "c" * 40})
     assert ok.status_code == 200
+    no_key = {k: v for k, v in hdrs.items() if k != "x-site-proxy-key"}                # another local process
+    assert local.get("/dex/api/admin/dataset", headers=no_key).status_code == 401
+    assert local.get("/dex/api/admin/dataset", headers=hdrs | {"x-site-proxy-key": "k" * 63 + "x"}).status_code == 401
+    assert local.get("/dex/api/admin/dataset", headers=list(hdrs.items()) + [("x-site-proxy-key", key)]).status_code == 401
+
+
+def test_site_mode_refuses_to_start_without_proxy_key(tmp_path, monkeypatch):
+    monkeypatch.delenv("SITE_PROXY_KEY_FILE", raising=False)
+    monkeypatch.delenv("CREDENTIALS_DIRECTORY", raising=False)
+    with pytest.raises(SystemExit, match="proxy key"):
+        create_app(make_cfg(tmp_path, DEX_AUTH="site"))
 
 
 def test_password_hashing():

@@ -11,6 +11,7 @@ WorkingDirectory=@APP_DIR@
 Environment=PYTHONUNBUFFERED=1
 Environment=PYTHONDONTWRITEBYTECODE=1
 Environment=DEX_AUTH=@AUTH@
+@PROXY_CREDENTIAL@
 Environment=DEX_HOST=127.0.0.1
 Environment=DEX_PORT=@PORT@
 Environment=DEX_BASE_PATH=@BASE_PATH@
