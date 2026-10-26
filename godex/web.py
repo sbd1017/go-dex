@@ -1,6 +1,6 @@
 """HTTP: the public read-only Pokédex, the admin editor, and the JSON API.
 
-Public (no login):  GET  {base}/  /wishlist  /trade  /stats  /<dex>   GET {base}/api/dataset
+Public (no login):  GET  {base}/  /wishlist  /trade  /backgrounds  /stats  /<dex>   GET {base}/api/dataset
 Admin (login):      GET  {base}/admin/...                             POST {base}/api/admin/...
 Everything that changes data is a POST under /api/admin/, checked for a session, Origin and a CSRF token.
 """
@@ -26,7 +26,7 @@ from .sprites import SpriteIndex
 
 log = logging.getLogger("godex")
 STATIC = pathlib.Path(__file__).resolve().parent / "static"
-PAGE_RE = re.compile(r"/(|wishlist|trade|stats|\d{1,4})/?")
+PAGE_RE = re.compile(r"/(|wishlist|trade|backgrounds|stats|\d{1,4})/?")
 CSP = ("default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; "
        "manifest-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'")
 
@@ -171,6 +171,10 @@ def create_app(cfg: config.Config | None = None) -> FastAPI:
             offer = q("SELECT coalesce(sum(for_trade), 0) FROM entries")
             want = q("SELECT count(*) FROM wishes WHERE status = 'open' AND public = 1")
             title, desc = (f"Trade with {who}" if who else "Trade"), f"{offer} Pokémon to offer, {want} wanted."
+        elif rest == "backgrounds":
+            have = q("SELECT count(DISTINCT background_id) FROM entries WHERE background_id IS NOT NULL AND registered = 1")
+            total = q("SELECT count(*) FROM backgrounds")
+            title, desc = f"{whose}Backgrounds", f"{have} of {total} location and special backgrounds."
         elif rest == "stats":
             title, desc = f"{whose}Pokédex stats", "Collection progress: Pokédex, shiny, Shadow, lucky, XXL, costumes and more."
         elif rest.isdigit():

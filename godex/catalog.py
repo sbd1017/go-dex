@@ -136,10 +136,11 @@ def load(db: Database, path: pathlib.Path) -> dict:
 
         conn.execute("UPDATE backgrounds SET in_catalog = 0 WHERE custom = 0")
         conn.executemany(
-            """INSERT INTO backgrounds (id, name, kind, year, custom, in_catalog) VALUES (:id, :name, :kind, :year, 0, 1)
-               ON CONFLICT (id) DO UPDATE SET kind = excluded.kind, year = excluded.year, in_catalog = 1,
-                   name = CASE WHEN backgrounds.custom = 1 THEN backgrounds.name ELSE excluded.name END""",
-            cat["backgrounds"])
+            """INSERT INTO backgrounds (id, name, kind, year, image, custom, in_catalog)
+               VALUES (:id, :name, :kind, :year, :image, 0, 1)
+               ON CONFLICT (id) DO UPDATE SET kind = excluded.kind, year = excluded.year, image = excluded.image,
+                   in_catalog = 1, name = CASE WHEN backgrounds.custom = 1 THEN backgrounds.name ELSE excluded.name END""",
+            [{"image": None} | b for b in cat["backgrounds"]])
 
         changes = _changes(conn, before) if before["species"] else {}   # a first load adds everything: not news
         meta = [("catalog_built_at", cat["built_at"]), ("catalog_loaded_at", now())]

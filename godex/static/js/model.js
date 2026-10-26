@@ -53,9 +53,10 @@ export function buildModel(ds) {
     const v = { id, form, sp: form.sp, shiny: !!shiny, align: ALIGN[a], max: MAX[x], target: !!target, entries: [], wishes: [] };
     m.variants.push(v); m.variantById.set(id, v); form.variants.push(v); form.sp.variants.push(v);
   }
-  for (const [id, name, kind, year] of ds.backgrounds) m.backgrounds.set(id, { id, name, kind, year, n: norm(name) });
+  for (const [id, name, kind, year, img] of ds.backgrounds) m.backgrounds.set(id, { id, name, kind, year, img: img || null, n: norm(name), entries: [] });
   for (const [slug, label] of ds.tags) m.tags.set(slug, { slug, label, n: norm(label) });
   for (const raw of ds.entries) addEntry(m, entryFrom(raw));
+  indexBackgrounds(m);
   for (const w of ds.wishes) addWish(m, w);
   return m;
 }
@@ -66,12 +67,19 @@ function addEntry(m, e) {
   e.v = v; v.entries.push(e); m.entries.push(e);
 }
 
+/** Which of your Pokémon carry each background (for the Backgrounds page). */
+function indexBackgrounds(m) {
+  for (const bg of m.backgrounds.values()) bg.entries = [];
+  for (const e of m.entries) if (e.bg) m.backgrounds.get(e.bg)?.entries.push(e);
+}
+
 /** Replace all entries of the given variants (after a quick edit). */
 export function replaceEntries(m, variantIds, rows) {
   const ids = new Set(variantIds);
   m.entries = m.entries.filter(e => !ids.has(e.variantId));
   for (const id of ids) { const v = m.variantById.get(id); if (v) v.entries = []; }
   for (const r of rows) addEntry(m, entryFrom(r));
+  indexBackgrounds(m);
 }
 
 function addWish(m, raw) {

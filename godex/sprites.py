@@ -8,6 +8,8 @@ Looked up in DEX_SPRITES_DIR (default media/sprites), first match wins:
   3. the species' base icon (same naming)
   4. fallback/<dex>.png  fallback/shiny/<dex>.png               any flat dump numbered by National Dex
 .png and .webp both work. Anything missing is drawn as a placeholder by the browser.
+Backgrounds: backgrounds/<LC_ID> (your own picture for one) or backgrounds/<artwork name> (lc_GoTour2023, as in
+the game's LocationCards folder).
 """
 import os
 import pathlib
@@ -23,7 +25,7 @@ class SpriteIndex:
 
     def _signature(self):
         sig = []
-        for sub in ("", "custom", "fallback", "fallback/shiny"):
+        for sub in ("", "custom", "fallback", "fallback/shiny", "backgrounds"):
             try:
                 sig.append(os.stat(self.root / sub).st_mtime_ns)
             except FileNotFoundError:
@@ -62,6 +64,9 @@ class SpriteIndex:
             gmax = self.find(f"custom/{fid}.gmax", f"{gimg}.icon")
             gshiny = self.find(f"custom/{fid}.gmax.s", f"{gimg}.s.icon")
         return [normal, shiny, gmax, gshiny]
+
+    def for_background(self, bg) -> str | None:
+        return self.find(f"backgrounds/{bg['id']}", bg["image"] and f"backgrounds/{bg['image']}")
 
     @property
     def count(self) -> int:

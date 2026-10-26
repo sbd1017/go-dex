@@ -35,8 +35,8 @@ def registered_rate(kind, cls, dex, shiny, align, max_):
         return 0.45 if shiny else 0.95
     if kind == "event":
         return 0.05 if shiny else 0.45
-    if kind == "costume":
-        return 0.3 if shiny else 0.78
+    if kind == "costume":                             # event regular: most costumes, many shiny
+        return 0.55 if shiny else 0.96
     if align == "shadow":
         return 0.22 if shiny else 0.86
     if align == "purified":
@@ -99,10 +99,26 @@ with db.write() as conn:
             special(vid, size="xxl", gender="female" if gd and chance() < 0.4 else "")
         if chance() < 0.29:
             special(vid, size="xxs")
-        if special_bgs and chance() < 0.12:              # in-game event backgrounds
+        if special_bgs and chance() < 0.2:               # in-game event backgrounds
             special(vid, background_id=rnd.choice(special_bgs))
         if attended and chance() < 0.035:                # caught at an event they went to
             special(vid, background_id=rnd.choice(attended))
+    # Location backgrounds from events they never went to arrive in trades (a trade can also make it lucky).
+    location_bgs = [r[0] for r in q("SELECT id FROM backgrounds WHERE kind = 'location' AND custom = 0")]
+    for bg_id in rnd.sample(location_bgs, min(45, len(location_bgs))):
+        _dex, (vid, _cls, _gd) = rnd.choice(species)
+        year = int(bg_id[3:7]) if bg_id[3:7].isdigit() else 2024
+        special(vid, background_id=bg_id, lucky=int(chance() < 0.35), tags=["traded"],
+                caught_on=f"{year}-{rnd.randint(1, 12):02d}-{rnd.randint(1, 28):02d}")
+    # A few named favourites with their CP, and shiny luckies from trades.
+    names = ["Sparky", "Ember", "Bubbles", "Captain", "Pebble", "Noodle", "Biscuit", "Ziggy", "Mochi", "Sunny", "Pip", "Rex"]
+    for nick, (_dex, (vid, _cls, _gd)) in zip(names, rnd.sample(species, len(names)), strict=True):
+        special(vid, nickname=nick, cp=rnd.randint(1500, 4200), gender=rnd.choice(["", "male", "female"]),
+                caught_on=f"{rnd.randint(2018, 2026)}-{rnd.randint(1, 12):02d}-{rnd.randint(1, 28):02d}")
+    shiny_owned = q("""SELECT DISTINCT e.variant_id FROM entries e JOIN variants v ON v.id = e.variant_id
+                       WHERE v.shiny = 1 AND v.alignment = 'normal' AND v.max = 'none' AND e.owned > 0""")
+    for (vid,) in rnd.sample(shiny_owned, min(30, len(shiny_owned))):
+        special(vid, lucky=1, tags=["traded"])
     for _dex, (vid, _cls, _gd) in rnd.sample(species, min(40, len(species))):
         special(vid, tags=["pvp"], moves=rnd.choice(["Counter / Ice Punch", "Mud Shot / Earthquake",
                                                       "Shadow Claw / Shadow Ball", "Dragon Breath / Sky Attack",

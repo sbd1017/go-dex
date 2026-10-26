@@ -29,6 +29,14 @@ custom/PIKACHU_GOFEST_2026_CAP_RED.s.png     shiny
 custom/CHARIZARD.gmax.png                    Gigantamax (and .gmax.s.png)
 ```
 
+## Backgrounds
+
+Location and special background pictures go in `backgrounds/`, named by the game's artwork name (in
+`data/catalog.json`, for example `backgrounds/lc_GoFest2024_madrid.png`) or by the background id for your own
+picture (`backgrounds/LC_2024_MADRID_GOFEST_001.png`). `python tools/fetch_sprites.py --backgrounds` downloads
+them from the PokeMiners dump (about 230 files; 90 MB as PNG, under 10 MB as WebP if Pillow is installed). Without
+a picture, a background is shown by its name.
+
 ## Anything numbered by Pokédex
 
 `fallback/25.png` and `fallback/shiny/25.png` are used when nothing more specific exists, so a flat

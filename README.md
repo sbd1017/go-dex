@@ -35,6 +35,8 @@ trainer who plays most events). Anyone can edit it at `/dex/admin`, and it reset
   IVs, XXL/XXS, a background, moves, gender, tags like PvP or Special Trade) and a priority. It tells you when
   something you own already matches.
 * **Trade** page: what you can offer (with quantities) next to what you are looking for, plus "copy as text".
+* **Backgrounds**: every location and special background in the game as a gallery, the ones you have in colour
+  with the Pokémon that carry them. A Pokémon with a background shows the artwork behind it, like the game does.
 * **Stats**: Pokédex, shiny, Shadow, Purified, lucky, perfect, XXL/XXS, costumes, forms, Megas,
   Gigantamax, backgrounds and per-generation progress. Every number opens the matching search.
 * **Trade compare**: a visitor types what they have and what they want, and sees which of theirs are on your

@@ -78,7 +78,7 @@ def build(conn, sprites, admin: bool) -> dict:
                      "changes": json.loads(meta["catalog_changes"]) if meta.get("catalog_changes") else None}
                     if admin else None),
         "species": species, "forms": forms, "variants": variants, "entries": entries, "wishes": wishes,
-        "backgrounds": [[b["id"], b["name"], b["kind"], b["year"]] for b in conn.execute(
+        "backgrounds": [[b["id"], b["name"], b["kind"], b["year"], sprites.for_background(b)] for b in conn.execute(
             "SELECT * FROM backgrounds ORDER BY kind, year DESC, name")],
         "tags": [[t["slug"], t["label"]] for t in conn.execute("SELECT slug, label FROM tags ORDER BY label")],
         "sprites": sprites.count,

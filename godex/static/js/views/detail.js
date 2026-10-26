@@ -3,7 +3,7 @@
 import { h, icon, pad, fmt, toast, copyText, modal } from '../dom.js';
 import { variantHas, variantLabel, formLabel, isSpecial, forTrade, canHave } from '../model.js';
 import { searchFromQuery } from '../query.js';
-import { sprite, typeChips, entryChips, entryLine, wishCard, pips } from '../components.js';
+import { sprite, typeChips, entryChips, entryLine, wishCard, pips, shownBackground, bgUrl } from '../components.js';
 import { entryEditor, wishEditor } from '../editors.js';
 
 const REGION = { kanto: 'Kanto', johto: 'Johto', hoenn: 'Hoenn', sinnoh: 'Sinnoh', unova: 'Unova', kalos: 'Kalos',
@@ -143,7 +143,9 @@ function tile(app, v, on, mode) {
   let state = has ? 'In Pokédex' : 'Missing';
   if (t) state += ` · ${t} for trade`;
   if (!v.target && !v.entries.length) state = 'Not counted';
-  return h('button', { type: 'button', class: ['vt', has ? 'have' : 'miss', on && 'on', !v.target && 'untracked'], 'aria-pressed': String(on),
+  const bg = has ? shownBackground(app, [v], mode)?.bg : null;
+  return h('button', { type: 'button', class: ['vt', has ? 'have' : 'miss', on && 'on', !v.target && 'untracked', bg && 'has-bg'],
+    'aria-pressed': String(on), title: bg ? bg.name : null, style: bg ? { '--bgart': `url("${bgUrl(app, bg)}")` } : {},
     onclick: () => { sheet.varId = v.id; paint(app, v.sp); } },
   sprite(app, v, { size: 'm' }),
   h('span', { class: 'vt-l', text: variantLabel(v, { withName: false }) }),
@@ -201,8 +203,12 @@ function stepper(label, value, onDelta, onSet) {
 }
 
 function entryRow(app, e, { showVariant = true } = {}) {
-  return h('li', { class: 'entry' },
-    sprite(app, e.v, { size: 'xs' }),
+  const bg = e.bg ? app.model.backgrounds.get(e.bg) : null;
+  const art = bgUrl(app, bg)
+    ? h('span', { class: 'bgthumb', title: bg.name, style: { '--bgart': `url("${bgUrl(app, bg)}")` } }, sprite(app, e.v, { size: 's' }))
+    : sprite(app, e.v, { size: 'xs' });
+  return h('li', { class: ['entry', art.classList.contains('bgthumb') && 'with-bg'] },
+    art,
     h('div', { class: 'entry-b' },
       h('div', { class: 'entry-t' }, showVariant ? h('b', { text: variantLabel(e.v) }) : null, h('span', { class: 'muted', text: entryLine(e) })),
       h('div', { class: 'chips' }, entryChips(e, app.model)),

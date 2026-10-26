@@ -20,6 +20,21 @@ export function sprite(app, v, { size = 'm', silhouette = false } = {}) {
     h('img', { src: `${app.cfg.base}/media/sprites/${file}`, alt: '', loading: 'lazy', decoding: 'async', draggable: 'false' }));
 }
 
+/** URL of a background's artwork, or null when you have no image for it. */
+export const bgUrl = (app, bg) => (bg?.img ? `${app.cfg.base}/media/sprites/${bg.img}` : null);
+
+/** The first background (with artwork) on any Pokémon you have among these variants, to show behind them:
+ * { bg, v } with the variant that carries it, or null. */
+export function shownBackground(app, variants, mode) {
+  for (const v of variants) {
+    for (const e of v.entries) {
+      const bg = e.bg && inMode(e, mode) ? app.model.backgrounds.get(e.bg) : null;
+      if (bg?.img) return { bg, v };
+    }
+  }
+  return null;
+}
+
 export function typeChips(types) {
   return h('span', { class: 'types' }, types.map(t => h('span', { class: 'type', style: { '--t': typeColor(t) }, text: t })));
 }

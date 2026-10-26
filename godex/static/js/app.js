@@ -7,12 +7,13 @@ import * as detailView from './views/detail.js';
 import * as wishView from './views/wishlist.js';
 import * as tradeView from './views/trade.js';
 import * as statsView from './views/stats.js';
+import * as bgView from './views/backgrounds.js';
 import * as dataView from './views/data.js';
 
 const CFG = JSON.parse(document.getElementById('dex-config').textContent);
-const VIEWS = { dex: dexView, wishlist: wishView, trade: tradeView, stats: statsView, data: dataView };
+const VIEWS = { dex: dexView, wishlist: wishView, trade: tradeView, backgrounds: bgView, stats: statsView, data: dataView };
 const TABS = [['dex', '', 'Pokédex', 'dex'], ['wishlist', '/wishlist', 'Wishlist', 'wish'], ['trade', '/trade', 'Trade', 'trade'],
-  ['stats', '/stats', 'Stats', 'chart']];
+  ['backgrounds', '/backgrounds', 'Backgrounds', 'bg'], ['stats', '/stats', 'Stats', 'chart']];
 
 export const app = {
   cfg: CFG, admin: CFG.admin, model: null, route: null, lastQuery: {}, navCount: 0,
@@ -135,7 +136,7 @@ export const app = {
     if (!sameView) window.scrollTo(0, 0);
     const s = this.model.settings;
     const who = s.owner_name ? `${s.owner_name}'s ` : '';
-    const titles = { dex: s.title || 'Pokédex', wishlist: 'Wishlist', trade: 'Trade', stats: 'Stats', data: 'Data' };
+    const titles = { dex: s.title || 'Pokédex', wishlist: 'Wishlist', trade: 'Trade', backgrounds: 'Backgrounds', stats: 'Stats', data: 'Data' };
     document.title = `${who}${titles[this.route.view]}${CFG.admin ? ' · editing' : ''}`;
   },
 

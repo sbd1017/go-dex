@@ -4,7 +4,7 @@ import { GO_WORDS, goSearchString, picksFromQuery } from '../gosearch.js';
 import { parse, compileVariants } from '../query.js';
 import { variantHas, formLabel, variantLabel, replaceEntries } from '../model.js';
 import { computeStats, REGION_NAMES } from '../stats.js';
-import { sprite, pips, searchBar } from '../components.js';
+import { sprite, pips, searchBar, shownBackground, bgUrl } from '../components.js';
 
 const QUICK = [['missing', 'Missing'], ['shiny', 'Shiny'], ['shadow', 'Shadow'], ['costume', 'Costume'], ['xxl', 'XXL'], ['xxs', 'XXS'],
   ['background', 'Background'], ['lucky', 'Lucky'], ['hundo', 'Hundo'], ['legendary', 'Legendary'], ['wish', 'Wishlist'],
@@ -138,16 +138,21 @@ function paintResults(app, st) {
 function card(app, g, mode, cache, variantQuery) {
   const has = v => variantHas(v, mode);
   const haveV = g.vars.find(has);
-  const rep = haveV || g.vars[0];
   const scope = (g.form ? g.form.variants : g.sp.variants).filter(v => v.target || v.entries.length);
+  // A Pokémon with a background shows it, like the game (the matching variant, when the search didn't pick one).
+  const shown = haveV ? shownBackground(app, variantQuery ? g.vars.filter(has) : scope, mode) : null;
+  const bg = shown?.bg;
+  const rep = (!variantQuery && shown?.v) || haveV || g.vars[0];
   const name = g.form ? formLabel(g.form) : g.sp.name;
   const href = app.href('dex', { dex: g.sp.dex, form: g.form?.id, text: app.route.text });
   const sig = [g.key, rep.id, !!haveV, variantQuery, href, scope.map(v => v.entries.length + ':' + v.wishes.length).join(','), mode,
     scope.reduce((n, v) => n + v.entries.reduce((k, e) => k + e.trade + (e.registered ? 1 : 0) + (e.size ? 2 : 0) + (e.lucky ? 4 : 0) + (e.bg ? 8 : 0), 0), 0)].join('|');
   const cached = cache.get(sig);
   if (cached) return cached;
-  const el = h('a', { class: ['card', haveV ? 'have' : 'miss', !haveV && variantQuery && 'dim'], href, 'data-nav': '1', role: 'listitem', dataset: { sig },
-    style: { '--t1': `var(--ty-${rep.form.types[0]})`, '--t2': `var(--ty-${rep.form.types[1] || rep.form.types[0]})` },
+  const el = h('a', { class: ['card', haveV ? 'have' : 'miss', !haveV && variantQuery && 'dim', bg && 'has-bg'], href, 'data-nav': '1', role: 'listitem',
+    dataset: { sig }, title: bg ? bg.name : null,
+    style: { '--t1': `var(--ty-${rep.form.types[0]})`, '--t2': `var(--ty-${rep.form.types[1] || rep.form.types[0]})`,
+      ...(bg ? { '--bgart': `url("${bgUrl(app, bg)}")` } : {}) },
     'aria-label': `${pad(g.sp.dex)} ${name}${haveV ? '' : ', missing'}` },
   h('span', { class: 'no', text: pad(g.sp.dex) }),
   sprite(app, rep, { silhouette: !haveV && !variantQuery }),

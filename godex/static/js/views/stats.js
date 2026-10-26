@@ -21,7 +21,7 @@ export function render(main, app) {
       h('span', { class: 'hero-v' }, h('b', { text: fmt(dex.have) }), h('span', { text: ` of ${fmt(dex.total)} Pokémon` })),
       meter(dex.have, dex.total), h('span', { class: 'hero-p', text: `${pct(dex.have, dex.total)}% · ${fmt(dex.total - dex.have)} to go` })),
     h('div', { class: 'tiles' },
-      TILES.map(id => s.byId[id]).filter(x => x && (x.total || x.have)).map(x => h('a', { class: 'tile', href: go(x.q), 'data-nav': '1' },
+      TILES.map(id => s.byId[id]).filter(x => x && (x.total || x.have)).map(x => h('a', { class: 'tile', href: x.id === 'background' ? app.href('backgrounds') : go(x.q), 'data-nav': '1' },
         h('span', { class: 'tile-l', text: x.label }),
         h('span', { class: 'tile-v' }, h('b', { text: fmt(x.have) }), x.total ? h('small', { text: ` / ${fmt(x.total)}` }) : null),
         x.total ? meter(x.have, x.total) : null)),

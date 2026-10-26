@@ -113,7 +113,8 @@ def build(src: dict, ov: dict) -> dict:
             form_lists[fs["pokemon"]] = fs.get("forms") or []
         elif tid.startswith("LC_") and "locationCardSettings" in data:
             name, kind, year = background_name(tid, ov)
-            backgrounds.append({"id": tid, "name": name, "kind": kind, "year": year})
+            backgrounds.append({"id": tid, "name": name, "kind": kind, "year": year,
+                                "image": data["locationCardSettings"].get("imageUrl") or None})
 
     api = {p["dexNr"]: p for p in pokedex}
     # A species the game master has but pokemon-go-api is missing (it happens with new releases): build it from the

@@ -523,3 +523,39 @@ body.login { display: grid; place-items: center; min-height: 100dvh; padding: 16
 .cat-changes { display: grid; gap: 10px; }
 .cat-new b { font-size: 14px; }
 .cat-new p { margin-top: 2px; }
+
+/* ---------------------------------------------------------------- backgrounds (art behind a Pokémon, like the game) */
+.card.has-bg, .vt.has-bg { background: linear-gradient(180deg, rgba(8, 12, 20, .05) 0%, rgba(8, 12, 20, .25) 45%, rgba(8, 12, 20, .9) 100%),
+  var(--bgart) center / cover no-repeat, var(--surface); border-color: color-mix(in srgb, var(--accent) 35%, var(--line)); }
+.card.has-bg .no, .card.has-bg .sub, .vt.has-bg .vt-s { color: rgba(255, 255, 255, .78); text-shadow: 0 1px 2px rgba(0, 0, 0, .6); }
+.card.has-bg .nm, .vt.has-bg .vt-l { color: #fff; text-shadow: 0 1px 3px rgba(0, 0, 0, .7); }
+.card.has-bg .art img, .vt.has-bg .art img, .bgthumb .art img, .bg-hero .art img { filter: drop-shadow(0 4px 6px rgba(0, 0, 0, .45)); }
+.bgthumb { flex: none; display: grid; place-items: center; width: 84px; height: 84px; border-radius: 14px; overflow: hidden;
+  background: var(--bgart) center / cover no-repeat, var(--surface-2); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .08); }
+.entry.with-bg { align-items: center; }
+
+/* Backgrounds page */
+.bgbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; }
+.bgbar .bgfind { flex: 1 1 220px; display: flex; }
+.bgbar input { width: 100%; height: 38px; padding: 0 14px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line);
+  color: var(--text); font-size: 15px; }
+.resultbar-t { margin: 4px 0 10px; color: var(--text-2); font-size: 14px; }
+.bggrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+.bgcard { display: flex; flex-direction: column; gap: 3px; padding: 0 0 10px; border-radius: 16px; background: var(--surface);
+  border: 1px solid var(--line); overflow: hidden; text-align: left; cursor: pointer; transition: transform .15s; }
+.bgcard:hover { transform: translateY(-2px); border-color: var(--line-2); }
+.bgcard.have { border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); }
+.bg-art { position: relative; display: block; aspect-ratio: 1; background: var(--surface-2); }
+.bg-art img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.bgcard.miss .bg-art img { filter: grayscale(.85) brightness(.55); }
+.bg-ph { position: absolute; inset: 0; display: grid; place-items: center; padding: 12px; text-align: center; font-size: 12px;
+  font-weight: 650; color: var(--text-3); }
+.bg-mons { position: absolute; left: 6px; right: 6px; bottom: 6px; display: flex; align-items: flex-end; gap: 2px; }
+.bg-mons .art img { filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .6)); }
+.bg-more { margin-left: auto; padding: 2px 7px; border-radius: 99px; background: rgba(0, 0, 0, .6); color: #fff; font-size: 11px; font-weight: 700; }
+.bg-nm { padding: 6px 10px 0; font-size: 13px; font-weight: 650; line-height: 1.2; }
+.bgcard.miss .bg-nm { color: var(--text-2); }
+.bg-meta { padding: 0 10px; font-size: 11.5px; color: var(--text-3); }
+.bg-hero { display: grid; place-items: end center; aspect-ratio: 1; max-height: 52vh; width: 100%; border-radius: 18px; overflow: hidden;
+  background: var(--bgart) center / cover no-repeat, var(--surface-2); padding-bottom: 6%; }
+.bg-hero.noart { aspect-ratio: auto; min-height: 120px; }
