@@ -1,6 +1,6 @@
 """HTTP: the public read-only Pokédex, the admin editor, and the JSON API.
 
-Public (no login):  GET  {base}/  /wishlist  /trade  /backgrounds  /stats  /<dex>   GET {base}/api/dataset
+Public (no login):  GET  {base}/  /wishlist  /trade  /backgrounds  /stats  /<dex>   GET {base}/api/dataset  /api/facts/<dex>
 Admin (login):      GET  {base}/admin/...                             POST {base}/api/admin/...
 Everything that changes data is a POST under /api/admin/, checked for a session, Origin and a CSRF token.
 """
@@ -20,6 +20,7 @@ from starlette.concurrency import run_in_threadpool
 from . import __version__, catalog, config, services
 from .auth import COOKIE, SESSION_SECONDS, Auth
 from .dataset import DatasetCache
+from .pokedex_facts import Facts
 from .db import Database
 from .services import Invalid
 from .sprites import SpriteIndex
@@ -42,6 +43,7 @@ def create_app(cfg: config.Config | None = None) -> FastAPI:
         catalog.load(db, cfg.current_catalog())
     sprites = SpriteIndex(cfg.sprites_dir)
     cache = DatasetCache(db, sprites)
+    facts = Facts(cfg.pokeapi_db)
     auth = Auth(cfg)
     index_html = (STATIC / "index.html").read_text(encoding="utf-8")
     static_version = _static_version()
@@ -266,6 +268,13 @@ def create_app(cfg: config.Config | None = None) -> FastAPI:
     @get(BASE + "/api/dataset")
     def dataset(request: Request):
         return dataset_response(request, admin=False)
+
+    @get(BASE + "/api/facts/{dex}")
+    def species_facts(dex: int, form: str = ""):
+        found = facts.get(dex, form[:40]) if 0 < dex < 10000 else None
+        if not found:
+            return JSONResponse({"facts": None}, headers={"Cache-Control": "private, max-age=3600"})
+        return JSONResponse({"facts": found}, headers={"Cache-Control": "private, max-age=86400"})
 
     @get(BASE + "/api/health")
     def health():

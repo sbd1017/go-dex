@@ -12,6 +12,7 @@ const CLASS = { legendary: 'Legendary', mythical: 'Mythical', ultra_beast: 'Ultr
 const ORDER = v => ['none', 'dynamax', 'gigantamax'].indexOf(v.max) * 10 + ['normal', 'shadow', 'purified'].indexOf(v.align) * 2 + (v.shiny ? 1 : 0);
 
 let sheet = null;   // { dex, formId, varId, wrap }
+const factsCache = new Map();   // "dex|form code" -> facts, null (none), or a pending Promise
 
 export function sync(app, { refresh = false } = {}) {
   const dex = app.route?.dex;
@@ -122,9 +123,36 @@ function paint(app, sp) {
         h('div', { class: 'vtiles' }, extra.map(v => tile(app, v, v === sel, mode)))) : null),
     sel ? variantPanel(app, sel, mode) : null,
     wishList(app, sp, form),
+    pokedexEntry(app, sp, form),
     app.admin ? recordSwitches(app, sp) : null));
   if (old) old.replaceWith(el); else sheet.wrap.append(el);
   el.scrollTop = scroll;
+}
+
+// Category, Pokédex entry, height and weight come from a local PokeAPI copy on the server, if it has one.
+// Costumes share the normal Pokémon's facts; regional, Mega and other forms have their own height and weight.
+function pokedexEntry(app, sp, form) {
+  const code = ['costume', 'event'].includes(form.kind) ? '' : form.code || '';
+  const key = `${sp.dex}|${code}`;
+  const got = factsCache.get(key);
+  if (got === undefined) {
+    factsCache.set(key, fetch(`${app.cfg.base}/api/facts/${sp.dex}?form=${encodeURIComponent(code)}`, { credentials: 'same-origin' })
+      .then(r => (r.ok ? r.json() : {})).then(d => d.facts || null).catch(() => null)
+      .then(f => { factsCache.set(key, f); if (f && sheet?.dex === sp.dex) paint(app, sp); }));
+    return null;
+  }
+  if (!got || got instanceof Promise) return null;
+  const num = (n, unit = '') => `${n.toLocaleString(undefined, { maximumFractionDigits: 1 })}${unit}`;
+  const gender = got.genderless ? 'Genderless'
+    : got.female_pct == null ? null
+      : got.female_pct === 0 ? 'Male only' : got.female_pct === 100 ? 'Female only'
+        : `${num(100 - got.female_pct, '%')} ♂ · ${num(got.female_pct, '%')} ♀`;
+  const sizes = [got.height_m != null && ['Height', num(got.height_m, ' m')], got.weight_kg != null && ['Weight', num(got.weight_kg, ' kg')],
+    gender && ['Gender', gender]].filter(Boolean);
+  return h('section', { class: 'blk dexentry' },
+    h('h3', { text: got.genus || 'Pokédex entry' }),
+    got.entry ? h('p', { class: 'dexentry-t', text: got.entry }) : null,
+    sizes.length ? h('dl', { class: 'dexentry-s' }, sizes.map(([k, v]) => h('div', {}, h('dt', { text: k }), h('dd', { text: v })))) : null);
 }
 
 const fact = (value, label, cls = '') => h('div', { class: `fact ${cls}` }, h('b', { text: value }), h('span', { text: label }));

@@ -17,6 +17,7 @@ class Config:
     password_hash: str        # for auth=password (python -m godex.cli hash-password)
     secure_cookies: bool
     public_origins: tuple     # extra allowed Origin values for admin POSTs
+    pokeapi_db: pathlib.Path | None  # optional PokeAPI SQLite file for species facts (see godex/pokedex_facts.py)
     host: str
     port: int
 
@@ -49,6 +50,7 @@ def load() -> Config:
         password_hash=env("DEX_ADMIN_PASSWORD_HASH", ""),
         secure_cookies=env("DEX_SECURE_COOKIES", "1") == "1",
         public_origins=tuple(o for o in env("DEX_PUBLIC_ORIGINS", "").split(",") if o),
+        pokeapi_db=pathlib.Path(pokeapi) if (pokeapi := env("DEX_POKEAPI_DB", "/srv/pokeapi/pokeapi.sqlite")) else None,
         host=env("DEX_HOST", "127.0.0.1"),
         port=int(env("DEX_PORT", "8782")),
     )

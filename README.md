@@ -37,6 +37,8 @@ trainer who plays most events). Anyone can edit it at `/dex/admin`, and it reset
 * **Trade** page: what you can offer (with quantities) next to what you are looking for, plus "copy as text".
 * **Backgrounds**: every location and special background in the game as a gallery, the ones you have in colour
   with the Pokémon that carry them. A Pokémon with a background shows the artwork behind it, like the game does.
+* **Pokédex entry** on each Pokémon page: category, entry text, height, weight and gender ratio, with the form's own
+  height and weight for regional forms and Megas (optional, from a local PokeAPI copy; see Pokémon data).
 * **Stats**: Pokédex, shiny, Shadow, Purified, lucky, perfect, XXL/XXS, costumes, forms, Megas,
   Gigantamax, backgrounds and per-generation progress. Every number opens the matching search.
 * **Trade compare**: a visitor types what they have and what they want, and sees which of theirs are on your
@@ -96,6 +98,13 @@ checks it, and lists what was added on the Data page ([docs/DEPLOY.md](docs/DEPL
 touched by that. If something is wrong for your
 purposes (say a costume shiny that was never released), you can also untick "Counts" on that variant in the
 admin page.
+
+The Pokédex entry block reads an optional SQLite file built from the [PokeAPI](https://github.com/PokeAPI/pokeapi)
+CSV dump (`data/v2/csv`, BSD-3-Clause), set with `DEX_POKEAPI_DB` (default `/srv/pokeapi/pokeapi.sqlite`). It needs
+two tables: `en_species (id, identifier, genus, flavor, gender_rate)` and
+`en_pokemon (species_id, identifier, is_default, height_dm, weight_hg)` with English text. The file is opened
+read-only and can be replaced while the app runs; without it the block is simply left out
+([godex/pokedex_facts.py](godex/pokedex_facts.py)).
 
 ## How the data is shaped
 

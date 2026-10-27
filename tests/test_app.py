@@ -307,3 +307,27 @@ def test_species_records(client):
     assert client.post("/dex/api/admin/species/record", json={"dex": 25, "record": "regional", "value": 1}).json()["ok"]
     assert sp(25)["regional"] == 1
     client.post("/dex/api/admin/undo", json={})
+
+
+def test_species_facts(tmp_path):
+    import sqlite3
+    pk = tmp_path / "pokeapi.sqlite"
+    with sqlite3.connect(pk) as c:
+        c.execute("CREATE TABLE en_species (id INTEGER, identifier TEXT, genus TEXT, flavor TEXT, gender_rate INTEGER)")
+        c.execute("CREATE TABLE en_pokemon (species_id INTEGER, identifier TEXT, is_default INTEGER, height_dm INTEGER, weight_hg INTEGER)")
+        c.executemany("INSERT INTO en_species VALUES (?,?,?,?,?)", [(19, "rattata", "Mouse Pokémon", "Bites anything.", 4),
+                                                                   (800, "necrozma", "Prism Pokémon", "", -1)])
+        c.executemany("INSERT INTO en_pokemon VALUES (?,?,?,?,?)", [
+            (19, "rattata", 1, 3, 35), (19, "rattata-alola", 0, 3, 38),
+            (800, "necrozma", 1, 24, 2300), (800, "necrozma-dusk", 0, 38, 4600)])
+    cfg = make_cfg(tmp_path, DEX_POKEAPI_DB=str(pk))
+    c = TestClient(create_app(cfg))
+    f = c.get("/dex/api/facts/19").json()["facts"]
+    assert (f["genus"], f["entry"], f["height_m"], f["weight_kg"], f["female_pct"]) == ("Mouse Pokémon", "Bites anything.", 0.3, 3.5, 50)
+    assert c.get("/dex/api/facts/19?form=ALOLA").json()["facts"]["weight_kg"] == 3.8
+    assert c.get("/dex/api/facts/19?form=JAN_2020").json()["facts"]["weight_kg"] == 3.5    # unknown form: default
+    n = c.get("/dex/api/facts/800?form=DUSK_MANE").json()["facts"]
+    assert (n["weight_kg"], n["genderless"], n["female_pct"], n["entry"]) == (460, True, None, None)
+    assert c.get("/dex/api/facts/1").json() == {"facts": None}
+    off = TestClient(create_app(make_cfg(tmp_path / "off", DEX_POKEAPI_DB="")))
+    assert off.get("/dex/api/facts/19").json() == {"facts": None}

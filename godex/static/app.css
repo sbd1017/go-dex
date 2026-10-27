@@ -298,6 +298,10 @@ h1, h2, h3, p { margin: 0; }
 .vt.have .vt-s { color: var(--accent); font-weight: 650; }
 .vt-p { display: flex; gap: 3px; min-height: 16px; margin-top: 2px; }
 .vt.add { justify-content: center; color: var(--text-2); border-style: dashed; gap: 6px; font-weight: 600; font-size: 13px; }
+.dexentry-t { font-size: 15px; line-height: 1.5; color: var(--text); max-width: 60ch; }
+.dexentry-s { margin: 10px 0 0; display: flex; flex-wrap: wrap; gap: 6px 22px; }
+.dexentry-s dt { font-size: 12px; font-weight: 600; color: var(--text-2); }
+.dexentry-s dd { margin: 0; font-size: 15px; font-weight: 700; }
 .extra { margin-top: 10px; }
 .extra summary { cursor: pointer; color: var(--text-2); font-size: 13px; font-weight: 600; margin-bottom: 8px; }
 .panel { padding: 14px; border-radius: 18px; background: var(--surface); border: 1px solid var(--line); }
