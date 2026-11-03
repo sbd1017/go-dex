@@ -102,8 +102,9 @@ single form.
 It is built from the PokeMiners game master, pokemon-go-api, Leek Duck's shiny list (released shinies per form and
 costume) and pogoapi.net, with local fixes in `data/overrides.json`. A server install updates it weekly on its own,
 checks it, and lists what was added on the Data page ([docs/DEPLOY.md](docs/DEPLOY.md)); your collection is never
-touched by that. If something is wrong for your
-purposes (say a costume shiny that was never released), you can also untick "Counts" on that variant in the
+touched by that. The game-data mirrors can lag by months, so newer releases and costumes are added in
+`data/overrides.json` (`species` for release flags, `new_forms` for forms by GO icon name). If something is wrong
+for your purposes (say a costume shiny that was never released), you can also untick "Counts" on that variant in the
 admin page.
 
 The Pokédex entry block reads an optional SQLite file built from the [PokeAPI](https://github.com/PokeAPI/pokeapi)

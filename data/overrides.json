@@ -34,7 +34,9 @@
   ],
   "_species": "Per-species flag overrides keyed by National Dex number: released, shiny, shadow, gmax, dynamax, sizes (XXS/XXL records), lucky.",
   "species": {
-    "151": {"sizes": false}
+    "151": {"sizes": false},
+    "946": {"released": true},
+    "947": {"released": true}
   },
   "_forms": "Per-form flag overrides keyed by form id: released, shiny, shadow, name, kind.",
   "forms": {},
@@ -83,7 +85,17 @@
   "new_forms": {
     "pm4.fGOGGLES_2026": {"name": "Goggles"},
     "pm5.fGOGGLES_2026": {"name": "Goggles"},
-    "pm6.fGOGGLES_2026": {"name": "Goggles"}
+    "pm6.fGOGGLES_2026": {"name": "Goggles"},
+    "pm25.fK_2026_A_01": {"name": "Hanbok"},
+    "pm25.fGLASS_HELMET_2026": {"name": "Astronaut"},
+    "pm25.fHALLOWEEN_2026": {"name": "Halloween 2026"},
+    "pm41.fHALLOWEEN_2026_01": {"name": "Top Hat"},
+    "pm42.fHALLOWEEN_2026_01": {"name": "Top Hat"},
+    "pm169.fHALLOWEEN_2026_01": {"name": "Top Hat"},
+    "pm854.fA_HALLOWEEN_2026_01": {"name": "Antique, Bow"},
+    "pm855.fA_HALLOWEEN_2026_01": {"name": "Antique, Bow"},
+    "pm854.fP_HALLOWEEN_2026_01": {"name": "Phony, Bow"},
+    "pm855.fP_HALLOWEEN_2026_01": {"name": "Phony, Bow"}
   },
   "_regional_species": "Regional exclusives in Pokémon GO (caught only in some parts of the world, or with region-locked forms such as Vivillon patterns). Search: regional, exclusive. Correct any one on its Pokémon page.",
   "regional_species": [83, 115, 122, 128, 214, 222, 313, 314, 324, 335, 336, 337, 338, 357, 369, 417, 422, 423, 441, 455,
