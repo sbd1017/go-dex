@@ -24,11 +24,14 @@ trainer who plays most events). Anyone can edit it at `/dex/admin`, and it reset
   all on each Pokémon's own page.
 * **Variant-level records.** Every form, costume, regional form, Mega, Gigantamax, shiny, Shadow and Purified
   version is tracked separately, and each individual Pokémon can carry size, lucky, IVs, background, gender,
-  moves, CP and notes.
+  moves, CP and notes. A "Which one" picker moves a record to the right form, say the Mega Y it became.
 * **Search** that works like the game's, with commas and `!`:
   `1-151, shiny, missing` · `pikachu, costume` · `xxl, shiny` · `legendary, xxl` · `shiny, !shadow` ·
-  `background, missing` · `+eevee` · `@special rend` · `bg:madrid`. Every search is in the address bar,
-  for example `/dex?shiny&missing`, so you can share exactly what you see.
+  `background, missing` · `+eevee` · `@special rend` · `bg:madrid` · `mega, hundo` · `regional`. Every search
+  is in the address bar, for example `/dex?shiny&missing`, so you can share exactly what you see.
+* **Missing works like the game's Pokédex**: `xxl, missing` lists Pokémon with no XXL in any form, and leaves out
+  what can't be had (Mew has no XXL or XXS, Pokémon that can't be traded can't be lucky). `regional` covers
+  regional forms and regional exclusives such as Comfey.
 * **Copy for Pokémon GO**: turn any result into an in-game search string, for example the Pokédex numbers of
   every XXL you are missing plus GO's own words: `xxs,xxl&shiny&1-3,7,25`. Paste it into your Pokémon storage.
 * **Wishlist** as its own page: wish for a specific variant with requirements (shiny, lucky, hundo or minimum
@@ -44,7 +47,7 @@ trainer who plays most events). Anyone can edit it at `/dex/admin`, and it reset
 * **Trade compare**: a visitor types what they have and what they want, and sees which of theirs are on your
   wishlist (and what still needs checking, like "needs XXL") and which of their wants you can offer.
 * **Admin**: quick toggles (in my Pokédex, for trade -/+), a quick-entry mode where tapping a card marks
-  it, special Pokémon, wishes, bulk actions on any search result, paste a list of Pokédex numbers, JSON/CSV
+  it, special Pokémon, wishes, per-Pokémon switches for what it can be (XXS/XXL, lucky, regional exclusive), bulk actions on any search result, paste a list of Pokédex numbers, JSON/CSV
   export, a repeatable JSON import with a dry run ([docs/IMPORT.md](docs/IMPORT.md)), and undo for every change.
 * **Phone friendly**: designed for the iPhone first, a floating region picker, Add to Home Screen, and link
   previews when you share a page in a chat.
@@ -57,8 +60,12 @@ trainer who plays most events). Anyone can edit it at `/dex/admin`, and it reset
 | `shiny, missing`: Pokémon with no shiny yet | Each Pokémon's page: forms, variants, what you have |
 | ![Copy for Pokémon GO](docs/screenshots/gosearch.webp) | ![Wishlist](docs/screenshots/wishlist.webp) |
 | Copy any result as a Pokémon GO search string | The wishlist, with "have one" when something matches |
-| ![Stats](docs/screenshots/stats.webp) | <img src="docs/screenshots/phone.webp" alt="On a phone" width="260"> |
-| Stats: every number opens the matching search | On a phone |
+| ![Backgrounds gallery](docs/screenshots/backgrounds.webp) | ![Search: background](docs/screenshots/background-cards.webp) |
+| Every background, with the Pokémon that carry it | A Pokémon with a background shows the artwork |
+| ![Stats](docs/screenshots/stats.webp) | ![Pokédex entry](docs/screenshots/pokedex-entry.webp) |
+| Stats: every number opens the matching search | Special ones and the Pokédex entry on a Pokémon's page |
+| <img src="docs/screenshots/phone.webp" alt="On a phone" width="260"> | |
+| On a phone | |
 
 The screenshots are from the demo. The images in them are not part of this repository (see [Images](#images)).
 
