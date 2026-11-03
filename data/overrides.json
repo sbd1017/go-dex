@@ -36,7 +36,8 @@
   "species": {
     "151": {"sizes": false},
     "946": {"released": true},
-    "947": {"released": true}
+    "947": {"released": true},
+    "884": {"gmax": true}
   },
   "_forms": "Per-form flag overrides keyed by form id: released, shiny, shadow, name, kind.",
   "forms": {},
@@ -95,7 +96,10 @@
     "pm854.fA_HALLOWEEN_2026_01": {"name": "Antique, Bow"},
     "pm855.fA_HALLOWEEN_2026_01": {"name": "Antique, Bow"},
     "pm854.fP_HALLOWEEN_2026_01": {"name": "Phony, Bow"},
-    "pm855.fP_HALLOWEEN_2026_01": {"name": "Phony, Bow"}
+    "pm855.fP_HALLOWEEN_2026_01": {"name": "Phony, Bow"},
+    "pm68.fWILDAREA_2026_01": {"name": "Modern Jacket"},
+    "pm705.fHISUIAN": {"name": "Hisuian", "kind": "regional", "region_tag": "hisuian", "types": ["steel", "dragon"], "sort": 1},
+    "pm706.fHISUIAN": {"name": "Hisuian", "kind": "regional", "region_tag": "hisuian", "types": ["steel", "dragon"], "sort": 1}
   },
   "_regional_species": "Regional exclusives in Pokémon GO (caught only in some parts of the world, or with region-locked forms such as Vivillon patterns). Search: regional, exclusive. Correct any one on its Pokémon page.",
   "regional_species": [83, 115, 122, 128, 214, 222, 313, 314, 324, 335, 336, 337, 338, 357, 369, 417, 422, 423, 441, 455,
