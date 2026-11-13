@@ -96,18 +96,29 @@ def background_name(code: str, ov: dict) -> tuple[str, str, int | None]:
 
 def build(src: dict, ov: dict) -> dict:
     gm, pokedex = src["gm.json"], src["pokedex.json"]
-    shiny_list = [x for x in src["leekduck_shiny.json"] if isinstance(x, dict) and x.get("aa_fn")]
+    # Leek Duck lists a shiny ahead of its release date (released_date in the future): it counts from that day on,
+    # and a Mega that is only on the list for the future (a debut) is not released yet either.
+    today = dt.datetime.now(dt.UTC).strftime("%Y/%m/%d")
+    listed = [x for x in src["leekduck_shiny.json"] if isinstance(x, dict) and x.get("aa_fn")]
+    shiny_list = [x for x in listed if (x.get("released_date") or "") <= today]
+    future_names = {x["aa_fn"] for x in listed} - {x["aa_fn"] for x in shiny_list}
     shiny_names = {x["aa_fn"] for x in shiny_list}               # GO icon names of every released shiny
     shiny_dex = {int(x["dex"]) for x in shiny_list}
     released = {int(k) for k in src["released_pokemon.json"]} | shiny_dex
 
-    settings, form_lists, backgrounds = {}, {}, []
+    settings, form_lists, backgrounds, dynamax_forms = {}, {}, [], set()
     for t in gm:
         tid, data = t["templateId"], t["data"]
         if m := re.fullmatch(r"V(\d{4})_POKEMON_.+", tid):
             ps = data.get("pokemonSettings")
             if ps:
                 settings[(ps["pokemonId"], ps.get("form"))] = ps | {"_dex": int(m[1])}
+        elif tid.startswith("EXTENDED_V"):
+            # Dynamax: the game master gives every Pokémon that can be Dynamax its Max Battle look (breadMode
+            # BREAD_MODE; BREAD_DOUGH_MODE is the Gigantamax look). Newer ones come from overrides "forms" dynamax.
+            es = data.get("pokemonExtendedSettings") or {}
+            if any(o.get("breadMode") == "BREAD_MODE" for o in es.get("breadOverrides") or []):
+                dynamax_forms.add(es.get("form") or f"{es['uniqueId']}_NORMAL")
         elif tid.startswith("FORMS_V"):
             fs = data["formSettings"]
             form_lists[fs["pokemon"]] = fs.get("forms") or []
@@ -165,7 +176,7 @@ def build(src: dict, ov: dict) -> dict:
             "gender_diff": any(a.get("isFemale") for a in p.get("assetForms") or []),
             "released": dex in released, "shiny": dex in shiny_dex,
             "shadow": bool(base_ps.get("shadow")), "gmax": bool(p.get("hasGigantamaxEvolution")),
-            "dynamax": False,
+            "dynamax": False,                            # set from the forms below
             "sizes": True,                               # XXS / XXL records (overrides turn it off, e.g. Mew)
             "lucky": bool(base_ps.get("isTradable")) if base_ps else True,  # only tradable ones can be lucky
             "regional": dex in regional,                     # regional exclusive (list in overrides)
@@ -232,6 +243,7 @@ def build(src: dict, ov: dict) -> dict:
                 "released": sp["released"] and targeted,
                 "shiny": is_shiny(image, f"pm{dex}" if is_base else None, f"pm{dex}.f{suffix}"),
                 "shadow": kind in ("base", "regional", "alternate") and bool(fps.get("shadow") or (is_base and sp["shadow"])),
+                "dynamax": kind in ("base", "regional", "alternate") and (fid in dynamax_forms or (is_base and f"{code}_NORMAL" in dynamax_forms)),
             }
             form.update(ov["forms"].get(form_id, {}))
             forms.append(form)
@@ -243,7 +255,8 @@ def build(src: dict, ov: dict) -> dict:
                 "id": mid, "dex": dex, "code": suffix, "name": strip_species(mega["names"]["English"], name) or "Mega",
                 "kind": "mega", "region_tag": "",
                 "types": [t for t in (ptype(mega["primaryType"]), ptype(mega.get("secondaryType"))) if t],
-                "sort": 900 + sort, "image": assets.get(suffix) or f"pm{dex}.f{suffix}", "released": sp["released"],
+                "sort": 900 + sort, "image": assets.get(suffix) or f"pm{dex}.f{suffix}",
+                "released": sp["released"] and not ({assets.get(suffix), f"pm{dex}.f{suffix}"} & future_names),
                 "shiny": sp["shiny"] or is_shiny(assets.get(suffix), f"pm{dex}.f{suffix}"), "shadow": False,
             } | ov["forms"].get(mid, {}))
             sort += 1
@@ -306,6 +319,7 @@ def build(src: dict, ov: dict) -> dict:
             if f["kind"] == "mega" and sp["shiny"]:
                 f["shiny"] = True
         sp.update({k: v for k, v in ov["species"].get(str(dex), {}).items() if k == "shiny"})
+        sp["dynamax"] = any(f.get("dynamax") for f in mine)
 
     return {
         "format": "godex-catalog", "version": 1,

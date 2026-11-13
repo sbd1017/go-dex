@@ -39,8 +39,11 @@
     "947": {"released": true},
     "884": {"gmax": true}
   },
-  "_forms": "Per-form flag overrides keyed by form id: released, shiny, shadow, name, kind.",
-  "forms": {},
+  "_forms": "Per-form flag overrides keyed by form id: released, shiny, shadow, dynamax, name, kind. Dynamax: forms newer than the game master's Max Battle list.",
+  "forms": {
+    "DIALGA": {"dynamax": true},
+    "PALKIA": {"dynamax": true}
+  },
   "background_tokens": {
     "GOFEST": "GO Fest",
     "GOTOUR": "GO Tour",

@@ -125,6 +125,15 @@ with db.write() as conn:
                                                       "Charm / Moonblast"]),
                 note=rnd.choice(["Great League", "Ultra League", "Master League"]))
 
+    # Dynamax from Max Battles (recorded, not counted towards completion). Its own random stream, so the rest of
+    # the demo stays the same whenever the catalog's Dynamax list grows.
+    drnd = random.Random(884)
+    for vid, shiny in q("""SELECT v.id, v.shiny FROM variants v JOIN forms f ON f.id = v.form_id
+                           WHERE v.max = 'dynamax' ORDER BY f.dex, f.sort, v.id"""):
+        if drnd.random() < (0.12 if shiny else 0.55):
+            services.save_entry(conn, batch, {"variant_id": vid, "registered": 1, "owned": drnd.choice((1, 1, 2)),
+                                              "source": "demo"})
+
     # A wishlist this kind of trainer would keep: missing shinies, a few perfect or special ones.
     have = {r[0] for r in q("SELECT DISTINCT variant_id FROM entries WHERE owned > 0")}
     missing_shiny = [r for r in q("""SELECT v.id, f.dex, f.id, s.class FROM variants v JOIN forms f ON f.id = v.form_id

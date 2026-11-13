@@ -37,9 +37,11 @@ def catalog_variants(sp: dict, form: dict, first_form: bool):
         if sp.get("gmax") and first_form:
             yield 0, "normal", "gigantamax", released
             yield 1, "normal", "gigantamax", released and bool(form.get("gmax_shiny", form["shiny"]))
-        if sp.get("dynamax"):
-            yield 0, "normal", "dynamax", released
-            yield 1, "normal", "dynamax", shiny
+        # Dynamax can be recorded but does not count towards completion: which ones (and which shinies) are out
+        # isn't in the game data. Tick "Counts" on a Dynamax variant to make it count.
+        if form.get("dynamax", sp.get("dynamax") and first_form):
+            yield 0, "normal", "dynamax", False
+            yield 1, "normal", "dynamax", False
 
 
 def built_at(path: pathlib.Path) -> str:

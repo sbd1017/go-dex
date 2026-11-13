@@ -74,3 +74,21 @@ def test_newest_catalog_wins(tmp_path):
     b.write_text(json.dumps({"built_at": "2026-10-01T00:00:00+00:00"}))
     assert catalog.newest(a, b) == b and catalog.newest(b, a) == b
     assert catalog.newest(a, tmp_path / "missing.json") == a
+
+
+def test_dynamax_is_recordable_but_not_counted_and_future_shinies_wait():
+    src = sources()
+    src["gm.json"].append({"templateId": "EXTENDED_V0001_POKEMON_BULBASAUR_NORMAL", "data": {"pokemonExtendedSettings": {
+        "uniqueId": "BULBASAUR", "form": "BULBASAUR_NORMAL", "breadOverrides": [{"breadMode": "BREAD_MODE"}]}}})
+    src["pokedex.json"][0]["megaEvolutions"] = {"BULBASAUR_MEGA": {
+        "names": {"English": "Mega Bulbasaur"}, "primaryType": {"type": "POKEMON_TYPE_GRASS"}}}
+    src["leekduck_shiny.json"] += [{"dex": 1, "aa_fn": "pm1.fFALL_2019", "released_date": "2999/01/01"},
+                                   {"dex": 1, "aa_fn": "pm1.fMEGA", "released_date": "2999/01/01"}]
+    cat = catalog_build.build(src, OV)
+    forms = {f["id"]: f for f in cat["forms"]}
+    assert forms["BULBASAUR"]["dynamax"] is True and forms["BULBASAUR_FALL_2019"]["dynamax"] is False
+    assert cat["species"][0]["dynamax"] is True
+    assert forms["BULBASAUR_FALL_2019"]["shiny"] is False            # listed for a future date: not yet
+    assert forms["BULBASAUR_MEGA"]["released"] is False              # a Mega debuting later
+    rows = list(catalog.catalog_variants(cat["species"][0], forms["BULBASAUR"], True))
+    assert (0, "normal", "dynamax", False) in rows and (1, "normal", "dynamax", False) in rows

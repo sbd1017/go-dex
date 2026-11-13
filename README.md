@@ -25,6 +25,8 @@ trainer who plays most events). Anyone can edit it at `/dex/admin`, and it reset
 * **Variant-level records.** Every form, costume, regional form, Mega, Gigantamax, shiny, Shadow and Purified
   version is tracked separately, and each individual Pokémon can carry size, lucky, IVs, background, gender,
   moves, CP and notes. A "Which one" picker moves a record to the right form, say the Mega Y it became.
+  Every Pokémon that can be Dynamax can be recorded as Dynamax (and shiny Dynamax); those don't count towards
+  completion unless you tick "Counts" on them.
 * **Search** that works like the game's, with commas and `!`:
   `1-151, shiny, missing` · `pikachu, costume` · `xxl, shiny` · `legendary, xxl` · `shiny, !shadow` ·
   `background, missing` · `+eevee` · `@special rend` · `bg:madrid` · `mega, hundo` · `regional`. Every search
@@ -100,7 +102,9 @@ single form.
 
 `data/catalog.json` holds species, forms, costumes, Megas, Gigantamax, shadow availability and backgrounds.
 It is built from the PokeMiners game master, pokemon-go-api, Leek Duck's shiny list (released shinies per form and
-costume) and pogoapi.net, with local fixes in `data/overrides.json`. A server install updates it weekly on its own,
+costume) and pogoapi.net, with local fixes in `data/overrides.json`. Dynamax comes from the game master's Max Battle
+data. A shiny Leek Duck lists ahead of its release date only counts from that day, and a Mega debuting later
+stays unreleased until then. A server install updates it weekly on its own,
 checks it, and lists what was added on the Data page ([docs/DEPLOY.md](docs/DEPLOY.md)); your collection is never
 touched by that. The game-data mirrors can lag by months, so newer releases and costumes are added in
 `data/overrides.json` (`species` for release flags, `new_forms` for forms by GO icon name). If something is wrong

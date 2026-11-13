@@ -467,7 +467,7 @@ def get_settings(conn) -> dict:
 
 def save_settings(conn, batch, data: dict) -> dict:
     current = get_settings(conn)
-    if data.get("link_url") and not re.fullmatch(r"(/[^\s]*|https://[^\s]+)", str(data["link_url"]).strip()):
+    if data.get("link_url") and not re.fullmatch(r"(/(?![/\\])[^\s\\]*|https://[^\s\\]+)", str(data["link_url"]).strip()):
         raise Invalid("The link must start with / or https://")
     for key, limit in (("owner_name", 40), ("title", 60), ("intro", 600), ("link_label", 30), ("link_url", 200)):
         if key in data:

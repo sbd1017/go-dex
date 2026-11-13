@@ -331,3 +331,10 @@ def test_species_facts(tmp_path):
     assert c.get("/dex/api/facts/1").json() == {"facts": None}
     off = TestClient(create_app(make_cfg(tmp_path / "off", DEX_POKEAPI_DB="")))
     assert off.get("/dex/api/facts/19").json() == {"facts": None}
+
+
+def test_header_link_cannot_point_off_site(client):
+    for bad in ("//evil.example", "/\\evil.example", "http://evil.example", "javascript:alert(1)", "/a b", "https://x/\\y"):
+        assert client.post("/dex/api/admin/settings", json={"link_url": bad}).status_code == 400, bad
+    assert client.post("/dex/api/admin/settings", json={"link_url": "/fine/page"}).status_code == 200
+    assert client.post("/dex/api/admin/settings", json={"link_url": ""}).status_code == 200
