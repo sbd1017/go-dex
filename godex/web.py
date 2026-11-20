@@ -470,6 +470,12 @@ def create_app(cfg: config.Config | None = None) -> FastAPI:
     @get(BASE + "/{rest:path}")
     def public_page(request: Request, rest: str):
         if not PAGE_RE.fullmatch("/" + rest):
+            if "text/html" in request.headers.get("accept", ""):     # a mistyped address in a browser: dark, like every page
+                return HTMLResponse(f"""<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#0b1018"><title>Not found</title>
+<link rel="stylesheet" href="{BASE}/static/v/{static_version}/app.css"></head>
+<body class="login"><div class="login-card"><h1>Not found</h1><a href="{BASE}/">Back to the Pokédex</a></div></body></html>""", 404)
             return PlainTextResponse("Not found", 404)
         return page(request, admin=False)
 
