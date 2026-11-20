@@ -1,4 +1,4 @@
-/* godex: one stylesheet, no build step. Dark by default; light via the theme button. */
+/* godex: one stylesheet, no build step. Dark only: one palette, no light theme and no theme switch. */
 
 :root {
   --bg: #0b1018; --bg-elev: #0f1520; --surface: #141c28; --surface-2: #1a2331; --surface-3: #232d3d;
@@ -17,18 +17,6 @@
   --ty-fighting: #C22E28; --ty-poison: #A33EA1; --ty-ground: #E2BF65; --ty-flying: #A98FF3; --ty-psychic: #F95587; --ty-bug: #A6B91A;
   --ty-rock: #B6A136; --ty-ghost: #735797; --ty-dragon: #6F35FC; --ty-dark: #705746; --ty-steel: #B7B7CE; --ty-fairy: #D685AD;
   color-scheme: dark;
-}
-:root[data-theme="light"] {
-  --bg: #eef2f6; --bg-elev: #f7f9fb; --surface: #ffffff; --surface-2: #f2f5f8; --surface-3: #e6ebf1;
-  --card: #ffffff; --card-miss: #e9eef3;
-  --line: rgba(15, 30, 50, .08); --line-2: rgba(15, 30, 50, .15);
-  --text: #121a26; --text-2: #4f5b6d; --text-3: #6b7689;
-  --accent: #0f9c8b; --accent-strong: #0b8577; --on-accent: #ffffff; --accent-tint: rgba(15, 156, 139, .12);
-  --shiny: #b88300; --shadow: #7a4ee0; --purified: #2b8fbf; --lucky: #c77700; --perfect: #d0532a; --size: #3a6fe0;
-  --bgc: #1f9a52; --wish: #d63a78; --trade: #1d7fd1; --max: #d2336d; --costume: #8d55e6;
-  --sil: brightness(0); --sil-op: .5;
-  --shadow-lg: 0 24px 60px rgba(15, 30, 50, .22);
-  color-scheme: light;
 }
 
 * { box-sizing: border-box; }
@@ -256,7 +244,6 @@ h1, h2, h3, p { margin: 0; }
 .sheet-hero { position: relative; padding: 12px 16px 20px; display: grid; grid-template-columns: auto 1fr; align-items: end; gap: 6px 16px;
   background: radial-gradient(90% 120% at 20% 40%, color-mix(in srgb, var(--t1) 58%, var(--bg-elev)), transparent 72%),
     radial-gradient(70% 100% at 100% 100%, color-mix(in srgb, var(--t2) 40%, var(--bg-elev)), transparent 70%), var(--bg-elev); color: #fff; }
-:root[data-theme="light"] .sheet-hero { color: #0d141f; }
 .sheet-tools { grid-column: 1 / -1; display: flex; gap: 8px; align-items: center; }
 .hero-art { min-width: 120px; }
 .hero-art .art-l { width: min(170px, 40vw); height: min(170px, 40vw); filter: drop-shadow(0 12px 18px rgba(0, 0, 0, .35)); }
@@ -454,8 +441,8 @@ textarea { resize: vertical; }
   display: flex; align-items: center; gap: 14px; padding: 11px 12px 11px 16px; border-radius: 14px; background: var(--text); color: var(--bg);
   font-weight: 600; font-size: 14px; box-shadow: var(--shadow-lg); opacity: 0; pointer-events: none; transition: .18s ease; max-width: calc(100vw - 32px); }
 #toast.on { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
-.toast-act { color: var(--accent-strong); font-weight: 800; padding: 4px 6px; }
-:root:not([data-theme="light"]) .toast-act { color: #0b8577; }
+/* the toast uses the page ink as its ground, so its action needs a deeper teal */
+.toast-act { color: #0b8577; font-weight: 800; padding: 4px 6px; }
 @media (min-width: 860px) { #toast { bottom: 24px; } }
 
 /* login page (password mode) */

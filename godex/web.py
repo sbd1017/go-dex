@@ -504,7 +504,8 @@ def _static_version() -> str:
 def _login_html(base: str, error: str, v: str, nxt: str = "/admin") -> str:
     msg = {"wrong": "That password didn't work.", "wait": "Too many tries. Wait a few minutes."}.get(error, "")
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1"><title>Sign in</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#0b1018"><title>Sign in</title>
 <link rel="stylesheet" href="{base}/static/v/{v}/app.css"></head>
 <body class="login"><form method="post" action="{base}/login" class="login-card">
 <h1>Edit your Pokédex</h1>{f'<p class="err">{msg}</p>' if msg else ''}

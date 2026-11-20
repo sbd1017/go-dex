@@ -168,7 +168,6 @@ export const app = {
       h('nav', { class: 'tabs-top', 'aria-label': 'Sections' }, tabLinks('tab')),
       h('div', { class: 'top-r' },
         CFG.admin ? h('button', { class: 'iconbtn', type: 'button', title: 'Undo the last change', 'aria-label': 'Undo', onclick: () => this.undo() }, icon('undo')) : null,
-        h('button', { class: 'iconbtn', type: 'button', title: 'Light / dark', 'aria-label': 'Switch theme', onclick: toggleTheme }, icon('theme')),
         // Everyone sees the cog; on the public page it leads to the editing page (which asks you to sign in first)
         // and opens Settings there.
         CFG.admin ? h('button', { class: 'iconbtn', type: 'button', title: 'Settings', 'aria-label': 'Settings', onclick: () => this.openSettings() }, icon('cog'))
@@ -181,13 +180,6 @@ export const app = {
 };
 
 const isJson = res => (res.headers.get('content-type') || '').includes('json');
-
-function toggleTheme() {
-  const cur = document.documentElement.dataset.theme || 'dark';
-  const next = cur === 'dark' ? 'light' : 'dark';
-  document.documentElement.dataset.theme = next;
-  try { localStorage.setItem('dex-theme', next); } catch { /* private mode */ }
-}
 
 async function boot() {
   document.body.addEventListener('click', e => {
